@@ -1,39 +1,80 @@
-# Blueprint for 2D Shooter Game
+# Blueprint for 2D Dogfight Game
 
 ## Project Overview
-This project implements a simple 2D shooter game using HTML5 Canvas, JavaScript, and CSS. The game features a player ship that can move and shoot, and an enemy ship that moves horizontally and shoots back. The game progresses through rounds, with an upgrade screen presented to the player after each round is completed.
+This project aims to create a dynamic 2D dogfight game where the player controls a plane against an AI-controlled opponent. The game will feature a progressive difficulty system, with both the player and enemy evolving their capabilities across rounds, ensuring a continuously challenging "control fight" experience. Obstacles will be introduced in later rounds to add strategic complexity.
 
-## Style, Design, and Features Implemented
--   **Core Game Loop:** `requestAnimationFrame` for smooth animations.
--   **Game States:** `playing`, `upgrade`, `gameOver`.
--   **Player Controls:** Keyboard (W, A, S, D) for movement, mouse for aiming and shooting.
--   **Collision Detection:** Basic Axis-Aligned Bounding Box (AABB) collision for bullets and ships.
--   **Health Bars:** Visual representation of player and enemy health.
--   **Rounds System:** Difficulty increases with each round (enemy health and attack power).
--   **Upgrade System:** After defeating an enemy, players can choose upgrades (attack damage, move speed, attack speed).
--   **Asset Handling:** Attempts to load `player.png` and `enemy.png` from the `assets` folder, with base64 encoded colored squares as fallback images.
--   **Basic UI:** Displays current round, game over screen, and upgrade selection.
--   **Styling:** Minimal CSS for centering the canvas, setting background, and basic text styles.
+## Style, Design, and Features Implemented (Initial State)
+-   **Application Type:** 2D Web Game.
+-   **Core Game Loop:** Utilizes `requestAnimationFrame` for smooth animations and game state updates.
+-   **Player Plane:**
+    *   **Movement:** Controlled by arrow keys (Up, Down, Left, Right).
+    *   **Shooting:** Fires bullets in the direction of the mouse cursor upon mouse click.
+-   **Enemy AI Plane:**
+    *   Computer-controlled, with basic AI logic to move and shoot towards the player.
+-   **Dynamic Difficulty / Progression System:**
+    *   Starts with weaker enemies.
+    *   **Round-based:** As rounds increase, enemies become stronger (increased health, speed, attack power).
+    *   **Player Scaling:** Player's stats (e.g., bullet damage, fire rate, health) will incrementally improve, or be presented as upgrade choices, to maintain balance.
+-   **Obstacles:**
+    *   Introduced in higher rounds to block movement and add tactical elements. Initially, these will be simple static shapes.
+-   **Game States:** Will include a start screen, active gameplay, game over, and round completion/upgrade selection screens.
+-   **Basic UI:** Displays essential information like player health, enemy health, current round, and possibly score.
 
-## Plan for Current Task: Make the game runnable and push to GitHub
+## Key Technologies
+-   **HTML5 Canvas:** The primary technology for rendering all game visuals (planes, bullets, obstacles, UI).
+-   **JavaScript (ES Modules):** For implementing all game logic, physics, AI, input handling, and state management.
+-   **CSS:** For basic styling of the web page, centering the canvas, and font presentation.
+
+## Visual Design & UX
+-   **Aesthetics:** The initial design will be clean and functional, employing simple colored geometric shapes (rectangles, circles) to represent planes, bullets, and obstacles. This allows for rapid prototyping and ensures core gameplay mechanics are solid before aesthetic enhancements. Placeholder sprites may be considered later if explicitly requested or if deemed necessary for clarity without adding significant complexity.
+-   **Layout:** The game canvas will be centrally positioned on the web page. UI elements (health bars, round number) will be placed intuitively, typically at the top or bottom of the canvas.
+-   **Interactivity:** Emphasizes smooth and responsive player controls for an engaging combat experience. Visual cues will indicate successful hits, damage taken, and state transitions (e.g., round start, game over).
+
+## Plan for Current Task: Implement and Push 2D Dogfight Game to GitHub
 
 ### Objective
-The user reports that "our game is not running". The objective is to identify why the game is not running, fix any issues, ensure it runs correctly, and then push all changes to the GitHub repository.
+To develop a 2D dogfight game with the described features, ensuring it is fully functional and then push the complete project to a GitHub repository.
 
 ### Steps
-1.  **Verify Asset Folder and Content (Status: completed):**
-    *   The `assets` folder exists but is currently empty. The game will use fallback colored squares for player and enemy sprites.
-2.  **Verify Firebase Configuration (Status: completed):**
-    *   The `.idx/mcp.json` file contains the correct Firebase configuration for the preview server.
-3.  **Ensure Game Runs in Preview (Status: in_progress):**
-    *   Since direct access to the browser console is not available, I expect the game to be running in the preview environment.
-    *   The game should display a canvas with a player, an enemy, and functional shooting mechanics (even if with colored squares).
-    *   **User Action Required:** Please confirm if the game is now visible and interactive in your preview environment. If it's still not running or encountering errors, please provide specific error messages from your browser's developer console.
-4.  **Address any identified issues (Status: pending):**
-    *   If the game is still not running or has errors, use the user's feedback to diagnose and fix.
-5.  **Prepare for GitHub Push (Status: pending):**
-    *   Stage all modified and new files.
-    *   Create a concise and descriptive commit message.
-    *   Commit the changes.
-6.  **Push to GitHub (Status: pending):**
+1.  **Scaffold Project Structure (Status: completed):**
+    *   Created `index.html`, `style.css`, and `main.js` with basic canvas and script linking.
+2.  **Implement Game Loop and Basic Canvas (Status: completed):**
+    *   Initialized canvas context.
+    *   Created the main game loop using `requestAnimationFrame`.
+    *   Implemented basic `update()` and `draw()` functions.
+3.  **Player Plane Implementation (Status: pending):**
+    *   Define player object (position, size, health, speed, bullet stats).
+    *   Implement arrow key movement handling.
+    *   Implement mouse click shooting towards mouse cursor.
+    *   Define bullet properties and update their movement.
+4.  **Enemy AI Plane Implementation (Status: pending):**
+    *   Define enemy object (position, size, health, speed, attack power).
+    *   Implement basic AI movement (e.g., horizontal patrol, simple pursuit).
+    *   Implement periodic shooting towards the player.
+5.  **Collision Detection (Status: pending):**
+    *   Develop a collision detection function (e.g., AABB) for:
+        *   Player bullets vs. Enemy.
+        *   Enemy bullets vs. Player.
+        *   Player vs. Obstacles (if present).
+        *   Enemy vs. Obstacles (if present).
+6.  **Game Progression System (Status: pending):**
+    *   Implement round counter and logic to advance rounds.
+    *   Scale enemy stats (health, speed, attack) with each round.
+    *   Scale player stats (e.g., bullet damage, fire rate) with each round.
+    *   Add an "upgrade" screen between rounds for player choices if dynamic upgrades are preferred over automatic scaling.
+7.  **Obstacle Generation (Status: pending):**
+    *   In later rounds, generate and render simple static obstacles on the canvas.
+    *   Ensure obstacles interact correctly with collision detection.
+8.  **User Interface (Status: pending):**
+    *   Display player and enemy health bars.
+    *   Show current round number.
+    *   Implement start, game over, and round complete screens.
+9.  **Refinement and Testing (Status: pending):**
+    *   Playtest the game to identify and fix bugs.
+    *   Adjust game balance (speed, damage, health).
+    *   Ensure all features work as described.
+10. **Prepare for GitHub Push (Status: pending):**
+    *   Stage all new and modified files.
+    *   Write a comprehensive commit message.
+11. **Push to GitHub (Status: pending):**
     *   Push the committed changes to the remote GitHub repository.
