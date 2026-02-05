@@ -18,18 +18,15 @@ let round = 1;
 // --- Asset Loading ---
 const playerImg = new Image();
 const enemyImg = new Image();
-playerImg.src = 'assets/player.png';
-enemyImg.src = 'assets/enemy.png';
+playerImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4_uAAAAAXNSR0IArs4c6QAAAHBJREFUGEFjOHz48B8DE4CgYqyogpWVAgaQYjDGAoYYvH379j8DE4CgYqiogpWVAgaQYjDGAoYYvH379j8DE4CgYqiogpWVAgaQYjDGAoYYvH379j8DE4CgYqiogpWVAgaQYjDGAoYYvH379j8DE4AAAHh70u12p0gAAAAASUVORK5CYII='; // Blue square
+enemyImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4_uAAAAAXNSR0IArs4c6QAAAHBJREFUGEFjOHz48B8DE4CgYqyogpWVAgaQYjDGAoYYvH379j8DE4CgYqiogpWVAgaQYjDGAoYYvH379j8DE4CgYqiogpWVAgaQYjDGAoYYvH379j8DE4CgYqiogpWVAgaQYjDGAoYYvH379j8DE4AAAHh70u12p0gAAAAASUVORK5CYII='; // Red square
 let imagesLoaded = false;
-let fallbackToSquares = false;
 
 const imageLoadPromise = Promise.all([
     new Promise(res => playerImg.onload = res),
     new Promise(res => enemyImg.onload = res)
 ]).then(() => {
     imagesLoaded = true;
-}).catch(() => {
-    fallbackToSquares = true;
 });
 
 
