@@ -1,25 +1,43 @@
-
-# Lotto Number Generator
+# Project Blueprint: 2D Shooter Game
 
 ## Overview
 
-This project is a simple, user-friendly Lotto Number Generator. It provides a clean interface for users to generate a set of unique random numbers for lottery drawings. The application is built with modern web technologies, including HTML, CSS, and JavaScript, focusing on a great user experience, accessibility, and a visually appealing design.
+This project is a simple 2D shooter game built with HTML, CSS, and vanilla JavaScript. The player controls a character that can move and shoot, fighting against an AI-controlled enemy. The game runs in the browser using the HTML5 Canvas API.
 
-## Implemented Features
+## Features
 
-*   **UI/UX Design:**
-    *   **Layout:** A centered, clean, and responsive layout that works on both mobile and desktop screens.
-    *   **Typography:** Clear and readable fonts with a "Lotto Number Generator" title.
-    *   **Color Scheme:** A modern and visually appealing color palette.
-    *   **Number Display:** Generated numbers are displayed in styled circles.
-    *   **Button:** A prominent button with a clear call-to-action ("Generate Numbers").
+### Core Gameplay
+*   **Player Control:** The player can move the character using the W, A, S, and D keys.
+*   **Shooting:** The player can shoot bullets by clicking the mouse. The bullets travel in the direction of the mouse cursor.
+*   **Enemy AI:** A single enemy character moves horizontally across the top of the screen and periodically shoots bullets toward the player.
+*   **Collision Detection:** The game detects collisions between player bullets and the enemy, and between enemy bullets and the player.
+*   **Health System:** Both the player and the enemy have health bars. Health decreases when hit by a bullet.
+*   **Win/Loss Condition:** The game ends when either the player's or the enemy's health reaches zero. A "You Win" or "Game Over" message is displayed.
+*   **Restart:** The game can be restarted by clicking the screen after a game over or win condition.
 
-*   **Core Functionality:**
-    *   **Number Generation:** Generates 6 unique random numbers between 1 and 45.
-    *   **Display:** The generated numbers are displayed in ascending order.
+### Technical Details
+*   **Frontend:** HTML, CSS, JavaScript
+*   **Rendering:** HTML5 Canvas 2D Context
+*   **Game Loop:** The game uses `requestAnimationFrame` for a smooth, efficient game loop.
+*   **State Management:** The game state (e.g., character positions, health, game status) is managed in plain JavaScript objects.
 
-## Current Plan
+## Design
 
-1.  **Set up the basic HTML structure:** Create the main container, title, a placeholder for the numbers, and a generation button.
-2.  **Style the application:** Apply modern CSS for layout, typography, colors, and component styling.
-3.  **Implement the JavaScript logic:** Write the code to generate and display the lottery numbers when the button is clicked.
+### Visuals
+*   **Theme:** A clean, minimalist "digital" or "retro" theme.
+*   **Player:** A blue square.
+*   **Enemy:** A red square.
+*   **Bullets:** Small yellow (player) and orange (enemy) squares.
+*   **UI:** Health bars are displayed above the player and enemy. Game-end messages are overlaid on a semi-transparent background.
+
+### Structure
+*   `index.html`: The main HTML file containing the `<canvas>` element.
+*   `style.css`: The stylesheet for the game page, providing a dark theme and centering the canvas.
+*   `main.js`: The core JavaScript file containing all game logic, including:
+    *   Game object definitions (player, enemy, bullets).
+    *   Event listeners for player input.
+    *   Game state initialization and management.
+    *   The main `gameLoop` function, which handles updates and drawing.
+    *   Collision detection and response.
+    *   Health and win/loss logic.
+    *   Drawing functions for all game elements.
