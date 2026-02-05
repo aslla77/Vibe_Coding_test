@@ -1,22 +1,39 @@
-## Current Task: Debugging Game Startup
+# Blueprint for 2D Shooter Game
 
-### Problem
-The user reported that the "game is not running."
+## Project Overview
+This project implements a simple 2D shooter game using HTML5 Canvas, JavaScript, and CSS. The game features a player ship that can move and shoot, and an enemy ship that moves horizontally and shoots back. The game progresses through rounds, with an upgrade screen presented to the player after each round is completed.
 
-### Diagnosis
-1.  **`index.html` and `style.css`:** Reviewed `index.html` and `style.css` and found no immediate issues that would prevent the game from loading or the canvas from being displayed.
-2.  **`main.js` and Asset Loading:** Identified that `main.js` attempts to load `player.png` and `enemy.png` from an `assets` directory. It has a fallback to drawing colored squares if these images are not found.
-3.  **`assets` directory:** Confirmed that the `assets` directory was empty.
-4.  **`mcp.json`:** Verified that the Firebase Studio preview server configuration in `.idx/mcp.json` was correct.
+## Style, Design, and Features Implemented
+-   **Core Game Loop:** `requestAnimationFrame` for smooth animations.
+-   **Game States:** `playing`, `upgrade`, `gameOver`.
+-   **Player Controls:** Keyboard (W, A, S, D) for movement, mouse for aiming and shooting.
+-   **Collision Detection:** Basic Axis-Aligned Bounding Box (AABB) collision for bullets and ships.
+-   **Health Bars:** Visual representation of player and enemy health.
+-   **Rounds System:** Difficulty increases with each round (enemy health and attack power).
+-   **Upgrade System:** After defeating an enemy, players can choose upgrades (attack damage, move speed, attack speed).
+-   **Asset Handling:** Attempts to load `player.png` and `enemy.png` from the `assets` folder, with base64 encoded colored squares as fallback images.
+-   **Basic UI:** Displays current round, game over screen, and upgrade selection.
+-   **Styling:** Minimal CSS for centering the canvas, setting background, and basic text styles.
 
-### Resolution
-Since the `assets` folder was empty and the game relies on these images (or their fallback) to properly initialize the game loop with `ctx.drawImage` calls, the primary issue was ensuring valid image sources.
+## Plan for Current Task: Make the game runnable and push to GitHub
 
-1.  **Embedded Base64 Placeholder Images:** To ensure the game runs immediately with visual elements and bypass the empty `assets` directory, `main.js` was modified. Base64 encoded placeholder images (a blue square for the player and a red square for the enemy) were directly embedded into the `playerImg.src` and `enemyImg.src` assignments.
-2.  **Removed `fallbackToSquares` logic:** The `catch` block in the `imageLoadPromise` and the `fallbackToSquares` variable were removed as the base64 images ensure the promise always resolves successfully, and `ctx.drawImage` will now always be called with valid image objects.
+### Objective
+The user reports that "our game is not running". The objective is to identify why the game is not running, fix any issues, ensure it runs correctly, and then push all changes to the GitHub repository.
 
-### Outcome
-The game should now be running in the Firebase Studio preview, with the player and enemy visibly represented by blue and red squares respectively. This resolves the "game not running" issue by providing immediate visual feedback upon load.
-
-## Future Plans (Deployment)
-The user has requested to "deploy to Git." Further clarification is needed on the exact deployment process (e.g., commit strategy, target repository, CI/CD setup if any). This will be addressed in the next interaction.
+### Steps
+1.  **Verify Asset Folder and Content (Status: completed):**
+    *   The `assets` folder exists but is currently empty. The game will use fallback colored squares for player and enemy sprites.
+2.  **Verify Firebase Configuration (Status: completed):**
+    *   The `.idx/mcp.json` file contains the correct Firebase configuration for the preview server.
+3.  **Ensure Game Runs in Preview (Status: in_progress):**
+    *   Since direct access to the browser console is not available, I expect the game to be running in the preview environment.
+    *   The game should display a canvas with a player, an enemy, and functional shooting mechanics (even if with colored squares).
+    *   **User Action Required:** Please confirm if the game is now visible and interactive in your preview environment. If it's still not running or encountering errors, please provide specific error messages from your browser's developer console.
+4.  **Address any identified issues (Status: pending):**
+    *   If the game is still not running or has errors, use the user's feedback to diagnose and fix.
+5.  **Prepare for GitHub Push (Status: pending):**
+    *   Stage all modified and new files.
+    *   Create a concise and descriptive commit message.
+    *   Commit the changes.
+6.  **Push to GitHub (Status: pending):**
+    *   Push the committed changes to the remote GitHub repository.
