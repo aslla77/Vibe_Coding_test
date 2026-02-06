@@ -190,6 +190,21 @@ function update() {
     });
 
 
+    // Player Shooting
+    if (mouse.isDown && now - player.lastShotTime > player.fireRate) {
+        player.lastShotTime = now;
+        const angle = Math.atan2(mouse.y - (player.y + player.height / 2), mouse.x - (player.x + player.width / 2));
+        playerBullets.push({
+            x: player.x + player.width / 2,
+            y: player.y + player.height / 2,
+            width: 8, height: 8,
+            color: '#00BFFF', // Deep Sky Blue
+            velocityX: Math.cos(angle) * 10,
+            velocityY: Math.sin(angle) * 10,
+            damage: player.bulletDamage
+        });
+    }
+
     // Enemy Movement (towards a random target)
     if (now - enemy.targetUpdateTimer > 2000) { // Update target every 2 seconds
         enemy.targetX = Math.random() * (canvas.width - enemy.width);
