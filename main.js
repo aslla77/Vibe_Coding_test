@@ -7,6 +7,8 @@ const aircraftOptions = document.querySelectorAll('.aircraft-option');
 const startGameButton = document.getElementById('startGameButton');
 const playerImage = new Image();
 playerImage.src = 'Gemini_Generated_Image_vgyitmvgyitmvgyi.png';
+const enemyImage = new Image();
+enemyImage.src = 'Gemini_Generated_Image_ao9cefao9cefao9c.png';
 
 
 canvas.width = 1000;
@@ -400,14 +402,8 @@ function drawPlayer(playerObj) {
 
 
 // Function to draw an equilateral triangle for the enemy (pointing down)
-function drawEnemyTriangle(enemyObj, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(enemyObj.x + enemyObj.width / 2, enemyObj.y + enemyObj.height);
-    ctx.lineTo(enemyObj.x, enemyObj.y);
-    ctx.lineTo(enemyObj.x + enemyObj.width, enemyObj.y);
-    ctx.closePath();
-    ctx.fill();
+function drawEnemy(enemyObj) {
+    ctx.drawImage(enemyImage, enemyObj.x, enemyObj.y, enemyObj.width, enemyObj.height);
 }
 
 
@@ -420,7 +416,7 @@ function draw() {
         drawHealthBar(player, player.x, player.y - 15, player.width, 10, '#28a745'); // Green health bar
 
         // Draw Enemy
-        drawEnemyTriangle(enemy, '#DC3545'); // Red
+        drawEnemy(enemy); // Use the new dynamic drawing function
         drawHealthBar(enemy, enemy.x, enemy.y - 15, enemy.width, 10, '#DC3545'); // Red health bar
 
         // Draw Player Bullets

@@ -30,31 +30,17 @@ This project aims to create a dynamic 2D dogfight game where the player controls
 -   **Layout:** The game canvas will be centrally positioned on the web page. UI elements (health bars, round number) will be placed intuitively, typically at the top or bottom of the canvas.
 -   **Interactivity:** Emphasizes smooth and responsive player controls for an engaging combat experience. Visual cues will indicate successful hits, damage taken, and state transitions (e.g., round start, game over).
 
-## Plan for Current Task: Implement Airplane Selection with Image and Laser Weapon
+## Plan for Current Task: Implement Enemy Image and Git Push
 
 ### Objective
-To allow the user to select one of three airplane types (Square, Triangle, Circle), with the Circle type represented by a user-provided image. The Circle airplane will fire a laser instead of bullets. After implementation, the changes will be pushed to GitHub.
+To replace the enemy's default shape with a user-provided image and then push all changes to GitHub.
 
 ### Steps
 1.  **Update `blueprint.md` (Status: completed):** Document the new feature and the plan.
-2.  **Modify `index.html` (Status: pending):**
-    *   Add a "start screen" container.
-    *   Inside the start screen, add buttons or selectable elements for "Square", "Triangle", and "Circle" airplane types.
-    *   Update the "Circle" option to use an `<img>` tag with the provided image.
-    *   Add a "Start Game" button, initially disabled until a plane is selected.
-3.  **Modify `style.css` (Status: pending):**
-    *   Add styles for the start screen, airplane selection buttons/elements, and the "Start Game" button.
-    *   Adjust styles for the "Circle" option to correctly display the image.
-4.  **Modify `main.js` (Status: pending):**
-    *   Implement game state management to control visibility of the start screen vs. game canvas.
-    *   Add event listeners to the airplane selection elements to capture the user's choice.
-    *   Store the selected airplane type in a game state variable.
-    *   Enable the "Start Game" button once an airplane is selected.
-    *   Upon "Start Game" click, hide the start screen and begin the game loop.
-    *   Load the user-provided image for the "Circle" airplane.
-    *   When the player starts the game, draw the selected shape or the spaceship image on the canvas.
-    *   Implement a laser weapon for the "Circle" airplane that fires in the direction of the mouse.
-5.  **Git Push (Status: pending):**
-    *   Stage all modified files.
+2.  **Modify `main.js` (Status: pending):**
+    *   Load the user-provided image for the enemy.
+    *   Modify the `drawEnemyTriangle` function (or create a new `drawEnemy` function) to draw the image instead of the triangle shape.
+3.  **Git Push (Status: pending):**
+    *   Stage all modified files, including the new enemy image file.
     *   Create a commit with a descriptive message.
     *   Push the commit to the remote repository.
