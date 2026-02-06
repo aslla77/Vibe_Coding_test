@@ -165,6 +165,8 @@ function checkCollision(rect1, rect2) {
 function update() {
     if (gameState !== 'playing') return;
 
+    const now = Date.now(); // Moved to the top of the update function
+
     // Player Movement
     if (keys.ArrowUp || keys.w) player.y = Math.max(0, player.y - player.speed);
     if (keys.ArrowDown || keys.s) player.y = Math.min(canvas.height - player.height, player.y + player.speed);
@@ -358,6 +360,13 @@ function draw() {
         ctx.fillText(`Player Health: ${player.health}/${player.maxHealth}`, 10, 60);
         ctx.fillText(`Damage: ${player.bulletDamage}`, 10, 90);
         ctx.fillText(`Speed: ${player.speed}`, 10, 120);
+
+        // Draw Enemy UI (Top Right)
+        ctx.textAlign = 'right';
+        ctx.fillText(`Enemy Health: ${enemy.health}/${enemy.maxHealth}`, canvas.width - 10, 30);
+        ctx.fillText(`Enemy Attack: ${enemy.attackPower}`, canvas.width - 10, 60);
+        ctx.fillText(`Enemy Speed: ${enemy.speed.toFixed(1)}`, canvas.width - 10, 90);
+
     } else if (gameState === 'gameOver') {
         ctx.fillStyle = '#FFFFFF';
         ctx.font = '48px Arial';
