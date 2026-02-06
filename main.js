@@ -191,7 +191,6 @@ function update() {
 
 
     // Enemy Movement (towards a random target)
-    const now = Date.now();
     if (now - enemy.targetUpdateTimer > 2000) { // Update target every 2 seconds
         enemy.targetX = Math.random() * (canvas.width - enemy.width);
         enemy.targetY = Math.random() * (canvas.height / 2 - enemy.height); // Stay in top half

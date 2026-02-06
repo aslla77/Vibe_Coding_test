@@ -6,7 +6,7 @@ This is my Vibe coding test repositories. -v3
 
 Make game
 
-2026/02/06 
+2026/02/06 -v4
 
 보상이 작용 안하는 현상 수정 \n
 
