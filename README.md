@@ -6,7 +6,7 @@ This is my Vibe coding test repositories. -v3
 
 Make game
 
-2026/02/06 -v7
+2026/02/06 -v8
 
 보상이 작용 안하는 현상 수정 / 라운드 지나갈 경우 위치 원래대로 초기화 수정 / 보상 때 적 정보 공개
 

@@ -6,9 +6,9 @@ const startScreen = document.getElementById('startScreen');
 const aircraftOptions = document.querySelectorAll('.aircraft-option');
 const startGameButton = document.getElementById('startGameButton');
 const playerImage = new Image();
-playerImage.src = 'Gemini_Generated_Image_vgyitmvgyitmvgyi.png';
+playerImage.src = '/Vibe_Coding_test/Gemini_Generated_Image_vgyitmvgyitmvgyi.png';
 const enemyImage = new Image();
-enemyImage.src = 'Gemini_Generated_Image_ao9cefao9cefao9c.png';
+enemyImage.src = '/Vibe_Coding_test/Gemini_Generated_Image_ao9cefao9cefao9c.png';
 
 
 canvas.width = 1000;
