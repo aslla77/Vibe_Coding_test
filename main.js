@@ -358,7 +358,7 @@ function draw() {
         ctx.fillText(`Player Health: ${player.health}/${player.maxHealth}`, 10, 60);
         ctx.fillText(`Damage: ${player.bulletDamage}`, 10, 90);
         ctx.fillText(`Speed: ${player.speed}`, 10, 120);
- else if (gameState === 'gameOver') {
+    } else if (gameState === 'gameOver') {
         ctx.fillStyle = '#FFFFFF';
         ctx.font = '48px Arial';
         ctx.textAlign = 'center';
