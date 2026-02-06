@@ -18,12 +18,6 @@ let enemyBullets = [];
 let obstacles = [];
 let upgradeOptions = [];
 
-// Images
-const playerImg = new Image();
-playerImg.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Airplane_silhouette_black.svg/200px-Airplane_silhouette_black.svg.png';
-const enemyImg = new Image();
-enemyImg.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Space_Invader.svg/200px-Space_Invader.svg.png';
-
 
 // Input state
 const keys = {
@@ -299,6 +293,28 @@ function drawHealthBar(obj, x, y, width, height, color) {
     ctx.strokeRect(x, y, width, height);
 }
 
+// Function to draw an equilateral triangle for the player (pointing up)
+function drawPlayerTriangle(playerObj, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(playerObj.x + playerObj.width / 2, playerObj.y);
+    ctx.lineTo(playerObj.x, playerObj.y + playerObj.height);
+    ctx.lineTo(playerObj.x + playerObj.width, playerObj.y + playerObj.height);
+    ctx.closePath();
+    ctx.fill();
+}
+
+// Function to draw an equilateral triangle for the enemy (pointing down)
+function drawEnemyTriangle(enemyObj, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(enemyObj.x + enemyObj.width / 2, enemyObj.y + enemyObj.height);
+    ctx.lineTo(enemyObj.x, enemyObj.y);
+    ctx.lineTo(enemyObj.x + enemyObj.width, enemyObj.y);
+    ctx.closePath();
+    ctx.fill();
+}
+
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
@@ -312,11 +328,11 @@ function draw() {
         ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2 + 20);
     } else if (gameState === 'playing') {
         // Draw Player
-        ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+        drawPlayerTriangle(player, '#007BFF'); // Blue
         drawHealthBar(player, player.x, player.y - 15, player.width, 10, '#28a745'); // Green health bar
 
         // Draw Enemy
-        ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
+        drawEnemyTriangle(enemy, '#DC3545'); // Red
         drawHealthBar(enemy, enemy.x, enemy.y - 15, enemy.width, 10, '#DC3545'); // Red health bar
 
         // Draw Player Bullets
@@ -393,19 +409,4 @@ function gameLoop() {
 }
 
 // Initial call to start the game loop
-let loadedImagesCount = 0;
-const totalImages = 2; // playerImg and enemyImg
-
-playerImg.onload = () => {
-    loadedImagesCount++;
-    if (loadedImagesCount === totalImages) {
-        requestAnimationFrame(gameLoop);
-    }
-};
-
-enemyImg.onload = () => {
-    loadedImagesCount++;
-    if (loadedImagesCount === totalImages) {
-        requestAnimationFrame(gameLoop);
-    }
-};
+requestAnimationFrame(gameLoop);
