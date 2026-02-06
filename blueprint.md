@@ -16,7 +16,7 @@ This project aims to create a dynamic 2D dogfight game where the player controls
     *   **Round-based:** As rounds increase, enemies become stronger (increased health, speed, attack power).
     *   **Player Scaling:** Player's stats (e.g., bullet damage, fire rate, health) will incrementally improve, or be presented as upgrade choices, to maintain balance.
 -   **Obstacles:**
-    *   Introduced in higher rounds to block movement and add tactical elements. Initially, these will be simple static shapes.
+    *   Introduced in higher rounds to add strategic complexity. Initially, these will be simple static shapes.
 -   **Game States:** Will include a start screen, active gameplay, game over, and round completion/upgrade selection screens.
 -   **Basic UI:** Displays essential information like player health, enemy health, current round, and possibly score.
 
@@ -30,51 +30,31 @@ This project aims to create a dynamic 2D dogfight game where the player controls
 -   **Layout:** The game canvas will be centrally positioned on the web page. UI elements (health bars, round number) will be placed intuitively, typically at the top or bottom of the canvas.
 -   **Interactivity:** Emphasizes smooth and responsive player controls for an engaging combat experience. Visual cues will indicate successful hits, damage taken, and state transitions (e.g., round start, game over).
 
-## Plan for Current Task: Implement and Push 2D Dogfight Game to GitHub
+## Plan for Current Task: Implement Airplane Selection with Image and Laser Weapon
 
 ### Objective
-To develop a 2D dogfight game with the described features, ensuring it is fully functional and then push the complete project to a GitHub repository.
+To allow the user to select one of three airplane types (Square, Triangle, Circle), with the Circle type represented by a user-provided image. The Circle airplane will fire a laser instead of bullets. After implementation, the changes will be pushed to GitHub.
 
 ### Steps
-1.  **Scaffold Project Structure (Status: completed):**
-    *   Created `index.html`, `style.css`, and `main.js` with basic canvas and script linking.
-2.  **Implement Game Loop and Basic Canvas (Status: completed):**
-    *   Initialized canvas context.
-    *   Created the main game loop using `requestAnimationFrame`.
-    *   Implemented basic `update()` and `draw()` functions.
-3.  **Player Plane Implementation (Status: pending):**
-    *   Define player object (position, size, health, speed, bullet stats).
-    *   Implement arrow key movement handling.
-    *   Implement mouse click shooting towards mouse cursor.
-    *   Define bullet properties and update their movement.
-4.  **Enemy AI Plane Implementation (Status: pending):**
-    *   Define enemy object (position, size, health, speed, attack power).
-    *   Implement basic AI movement (e.g., horizontal patrol, simple pursuit).
-    *   Implement periodic shooting towards the player.
-5.  **Collision Detection (Status: pending):**
-    *   Develop a collision detection function (e.g., AABB) for:
-        *   Player bullets vs. Enemy.
-        *   Enemy bullets vs. Player.
-        *   Player vs. Obstacles (if present).
-        *   Enemy vs. Obstacles (if present).
-6.  **Game Progression System (Status: pending):**
-    *   Implement round counter and logic to advance rounds.
-    *   Scale enemy stats (health, speed, attack) with each round.
-    *   Scale player stats (e.g., bullet damage, fire rate) with each round.
-    *   Add an "upgrade" screen between rounds for player choices if dynamic upgrades are preferred over automatic scaling.
-7.  **Obstacle Generation (Status: pending):**
-    *   In later rounds, generate and render simple static obstacles on the canvas.
-    *   Ensure obstacles interact correctly with collision detection.
-8.  **User Interface (Status: pending):**
-    *   Display player and enemy health bars.
-    *   Show current round number.
-    *   Implement start, game over, and round complete screens.
-9.  **Refinement and Testing (Status: pending):**
-    *   Playtest the game to identify and fix bugs.
-    *   Adjust game balance (speed, damage, health).
-    *   Ensure all features work as described.
-10. **Prepare for GitHub Push (Status: pending):**
-    *   Stage all new and modified files.
-    *   Write a comprehensive commit message.
-11. **Push to GitHub (Status: pending):**
-    *   Push the committed changes to the remote GitHub repository.
+1.  **Update `blueprint.md` (Status: completed):** Document the new feature and the plan.
+2.  **Modify `index.html` (Status: pending):**
+    *   Add a "start screen" container.
+    *   Inside the start screen, add buttons or selectable elements for "Square", "Triangle", and "Circle" airplane types.
+    *   Update the "Circle" option to use an `<img>` tag with the provided image.
+    *   Add a "Start Game" button, initially disabled until a plane is selected.
+3.  **Modify `style.css` (Status: pending):**
+    *   Add styles for the start screen, airplane selection buttons/elements, and the "Start Game" button.
+    *   Adjust styles for the "Circle" option to correctly display the image.
+4.  **Modify `main.js` (Status: pending):**
+    *   Implement game state management to control visibility of the start screen vs. game canvas.
+    *   Add event listeners to the airplane selection elements to capture the user's choice.
+    *   Store the selected airplane type in a game state variable.
+    *   Enable the "Start Game" button once an airplane is selected.
+    *   Upon "Start Game" click, hide the start screen and begin the game loop.
+    *   Load the user-provided image for the "Circle" airplane.
+    *   When the player starts the game, draw the selected shape or the spaceship image on the canvas.
+    *   Implement a laser weapon for the "Circle" airplane that fires in the direction of the mouse.
+5.  **Git Push (Status: pending):**
+    *   Stage all modified files.
+    *   Create a commit with a descriptive message.
+    *   Push the commit to the remote repository.

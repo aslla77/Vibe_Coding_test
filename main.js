@@ -2,6 +2,12 @@
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const startScreen = document.getElementById('startScreen');
+const aircraftOptions = document.querySelectorAll('.aircraft-option');
+const startGameButton = document.getElementById('startGameButton');
+const playerImage = new Image();
+playerImage.src = 'Gemini_Generated_Image_vgyitmvgyitmvgyi.png';
+
 
 canvas.width = 1000;
 canvas.height = 700;
@@ -9,12 +15,14 @@ canvas.height = 700;
 // Game state variables
 let gameState = 'start'; // 'start', 'playing', 'upgrade', 'gameOver'
 let round = 1;
+let selectedAircraft = '';
 
 // Player and Enemy objects (placeholder for now)
 let player = {};
 let enemy = {};
 let playerBullets = [];
 let enemyBullets = [];
+let lasers = [];
 let obstacles = [];
 let upgradeOptions = [];
 
@@ -25,6 +33,23 @@ const keys = {
     w: false, s: false, a: false, d: false // Also allow WASD for convenience
 };
 const mouse = { x: 0, y: 0, isDown: false };
+
+// --- Event Listeners for Start Screen ---
+aircraftOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        selectedAircraft = option.dataset.type;
+        aircraftOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        startGameButton.disabled = false;
+    });
+});
+
+startGameButton.addEventListener('click', () => {
+    startScreen.classList.add('hidden');
+    canvas.classList.remove('hidden');
+    initGame();
+});
+
 
 // --- Game Initialization ---
 function initGame() {
@@ -40,7 +65,8 @@ function initGame() {
         maxHealth: 100,
         bulletDamage: 10,
         fireRate: 300, // ms between shots
-        lastShotTime: 0
+        lastShotTime: 0,
+        type: selectedAircraft
     };
     startRound();
 }
@@ -67,6 +93,7 @@ function startRound() {
 
     playerBullets = [];
     enemyBullets = [];
+    lasers = [];
     obstacles = generateObstacles(round);
 
     // Reset player's position and health for the new round
@@ -126,8 +153,11 @@ canvas.addEventListener('mousemove', (e) => {
 
 canvas.addEventListener('mousedown', (e) => {
     mouse.isDown = true;
-    if (gameState === 'start' || gameState === 'gameOver') {
-        initGame();
+    if (gameState === 'gameOver') {
+        // Instead of directly calling init, show the start screen again
+        startScreen.classList.remove('hidden');
+        canvas.classList.add('hidden');
+        gameState = 'start';
     } else if (gameState === 'upgrade') {
         const rect = canvas.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
@@ -193,16 +223,30 @@ function update() {
     // Player Shooting
     if (mouse.isDown && now - player.lastShotTime > player.fireRate) {
         player.lastShotTime = now;
-        const angle = Math.atan2(mouse.y - (player.y + player.height / 2), mouse.x - (player.x + player.width / 2));
-        playerBullets.push({
-            x: player.x + player.width / 2,
-            y: player.y + player.height / 2,
-            width: 8, height: 8,
-            color: '#00BFFF', // Deep Sky Blue
-            velocityX: Math.cos(angle) * 10,
-            velocityY: Math.sin(angle) * 10,
-            damage: player.bulletDamage
-        });
+        if (player.type === 'circle') {
+             const angle = Math.atan2(mouse.y - (player.y + player.height / 2), mouse.x - (player.x + player.width / 2));
+             lasers.push({
+                x: player.x + player.width / 2,
+                y: player.y + player.height / 2,
+                width: 10,
+                height: 4,
+                color: '#FFD700', // Gold
+                velocityX: Math.cos(angle) * 20, // Lasers are faster
+                velocityY: Math.sin(angle) * 20,
+                damage: player.bulletDamage * 0.8 // Laser might do slightly less damage per hit but fires fast
+             });
+        } else {
+            const angle = Math.atan2(mouse.y - (player.y + player.height / 2), mouse.x - (player.x + player.width / 2));
+            playerBullets.push({
+                x: player.x + player.width / 2,
+                y: player.y + player.height / 2,
+                width: 8, height: 8,
+                color: '#00BFFF', // Deep Sky Blue
+                velocityX: Math.cos(angle) * 10,
+                velocityY: Math.sin(angle) * 10,
+                damage: player.bulletDamage
+            });
+        }
     }
 
     // Enemy Movement (towards a random target)
@@ -238,6 +282,21 @@ function update() {
             damage: enemy.attackPower
         });
     }
+    // Update Lasers
+    lasers.forEach((laser, index) => {
+        laser.x += laser.velocityX;
+        laser.y += laser.velocityY;
+        if (checkCollision(laser, enemy)) {
+            enemy.health -= laser.damage;
+            lasers.splice(index, 1);
+            if (enemy.health <= 0) {
+                showUpgradeScreen();
+            }
+        } else if (laser.x < 0 || laser.x > canvas.width || laser.y < 0 || laser.y > canvas.height) {
+            lasers.splice(index, 1);
+        }
+    });
+
 
     // Update Player Bullets
     playerBullets.forEach((bullet, index) => {
@@ -292,6 +351,13 @@ function update() {
             }
         });
     });
+    lasers.forEach((laser, lIndex) => {
+        obstacles.forEach(obstacle => {
+            if (checkCollision(laser, obstacle)) {
+                lasers.splice(lIndex, 1);
+            }
+        });
+    });
 }
 
 // --- Drawing Functions ---
@@ -307,15 +373,31 @@ function drawHealthBar(obj, x, y, width, height, color) {
 }
 
 // Function to draw an equilateral triangle for the player (pointing up)
-function drawPlayerTriangle(playerObj, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(playerObj.x + playerObj.width / 2, playerObj.y);
-    ctx.lineTo(playerObj.x, playerObj.y + playerObj.height);
-    ctx.lineTo(playerObj.x + playerObj.width, playerObj.y + playerObj.height);
-    ctx.closePath();
-    ctx.fill();
+function drawPlayer(playerObj) {
+    switch (playerObj.type) {
+        case 'square':
+            ctx.fillStyle = '#007BFF'; // Blue
+            ctx.fillRect(playerObj.x, playerObj.y, playerObj.width, playerObj.height);
+            break;
+        case 'triangle':
+            ctx.fillStyle = '#007BFF';
+            ctx.beginPath();
+            ctx.moveTo(playerObj.x + playerObj.width / 2, playerObj.y);
+            ctx.lineTo(playerObj.x, playerObj.y + playerObj.height);
+            ctx.lineTo(playerObj.x + playerObj.width, playerObj.y + playerObj.height);
+            ctx.closePath();
+            ctx.fill();
+            break;
+        case 'circle':
+            ctx.drawImage(playerImage, playerObj.x, playerObj.y, playerObj.width, playerObj.height);
+            break;
+        default: // Default to square if something goes wrong
+            ctx.fillStyle = '#007BFF';
+            ctx.fillRect(playerObj.x, playerObj.y, playerObj.width, playerObj.height);
+            break;
+    }
 }
+
 
 // Function to draw an equilateral triangle for the enemy (pointing down)
 function drawEnemyTriangle(enemyObj, color) {
@@ -332,16 +414,9 @@ function drawEnemyTriangle(enemyObj, color) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
 
-    if (gameState === 'start') {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = '48px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('2D Dogfight', canvas.width / 2, canvas.height / 2 - 50);
-        ctx.font = '24px Arial';
-        ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2 + 20);
-    } else if (gameState === 'playing') {
+    if (gameState === 'playing') {
         // Draw Player
-        drawPlayerTriangle(player, '#007BFF'); // Blue
+        drawPlayer(player); // Use the new dynamic drawing function
         drawHealthBar(player, player.x, player.y - 15, player.width, 10, '#28a745'); // Green health bar
 
         // Draw Enemy
@@ -352,6 +427,12 @@ function draw() {
         playerBullets.forEach(bullet => {
             ctx.fillStyle = bullet.color;
             ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+        });
+
+        // Draw Lasers
+        lasers.forEach(laser => {
+             ctx.fillStyle = laser.color;
+             ctx.fillRect(laser.x, laser.y, laser.width, laser.height);
         });
 
         // Draw Enemy Bullets
@@ -402,7 +483,7 @@ function draw() {
         const nextEnemySpeed = 3 + (nextRound - 1) * 0.3;
         ctx.font = '22px Arial';
         ctx.fillStyle = '#FFC107'; // Amber color
-        ctx.fillText(`Next Enemy Stats:`, canvas.width / 2, canvas.height / 2 - 100);
+        ctx.fillText(`Next Enemy Stats:`, canvas.w / 2, canvas.h / 2 - 100);
         ctx.fillText(`Health: ${nextEnemyHealth}, Attack: ${nextEnemyAttack}, Speed: ${nextEnemySpeed.toFixed(1)}`, canvas.width / 2, canvas.height / 2 - 70);
 
 
@@ -437,10 +518,19 @@ function draw() {
 
 // --- Game Loop ---
 function gameLoop() {
-    update();
-    draw();
+    if(gameState === 'start') {
+         // Draw start screen if it's not hidden
+        if (!startScreen.classList.contains('hidden')) {
+            // Optionally draw on canvas behind start screen
+        }
+    } else {
+        update();
+        draw();
+    }
     requestAnimationFrame(gameLoop);
 }
 
+// Initial setup
+canvas.classList.add('hidden');
 // Initial call to start the game loop
 requestAnimationFrame(gameLoop);
