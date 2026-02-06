@@ -18,6 +18,13 @@ let enemyBullets = [];
 let obstacles = [];
 let upgradeOptions = [];
 
+// Images
+const playerImg = new Image();
+playerImg.src = 'https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78199/airplane-clipart-md.png';
+const enemyImg = new Image();
+enemyImg.src = 'https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/38161/spaceship-clipart-md.png';
+
+
 // Input state
 const keys = {
     ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false,
@@ -64,6 +71,11 @@ function startRound() {
     playerBullets = [];
     enemyBullets = [];
     obstacles = generateObstacles(round);
+
+    // Reset player's position and health for the new round
+    player.x = canvas.width / 2 - 25;
+    player.y = canvas.height - 70;
+    player.health = player.maxHealth;
 
     // Player stats scale with rounds to keep it a "control fight"
     player.bulletDamage = 10 + (round - 1) * 2;
@@ -120,15 +132,22 @@ canvas.addEventListener('mousedown', (e) => {
     if (gameState === 'start' || gameState === 'gameOver') {
         initGame();
     } else if (gameState === 'upgrade') {
-        // Handle upgrade selection
         const rect = canvas.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
         const clickY = e.clientY - rect.top;
 
-        // Simple hit test for upgrade buttons (placeholder for now)
-        // For now, any click exits upgrade. Will refine later.
-        round++;
-        startRound();
+        upgradeOptions.forEach(option => {
+            if (
+                clickX >= option.x &&
+                clickX <= option.x + option.width &&
+                clickY >= option.y &&
+                clickY <= option.y + option.height
+            ) {
+                option.action(); // Perform the upgrade
+                round++;
+                startRound();
+            }
+        });
     }
 });
 
@@ -293,13 +312,11 @@ function draw() {
         ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2 + 20);
     } else if (gameState === 'playing') {
         // Draw Player
-        ctx.fillStyle = '#007BFF'; // Blue
-        ctx.fillRect(player.x, player.y, player.width, player.height);
+        ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
         drawHealthBar(player, player.x, player.y - 15, player.width, 10, '#28a745'); // Green health bar
 
         // Draw Enemy
-        ctx.fillStyle = '#DC3545'; // Red
-        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
         drawHealthBar(enemy, enemy.x, enemy.y - 15, enemy.width, 10, '#DC3545'); // Red health bar
 
         // Draw Player Bullets
