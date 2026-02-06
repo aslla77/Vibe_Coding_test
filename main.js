@@ -20,9 +20,9 @@ let upgradeOptions = [];
 
 // Images
 const playerImg = new Image();
-playerImg.src = 'https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78199/airplane-clipart-md.png';
+playerImg.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Airplane_silhouette_black.svg/200px-Airplane_silhouette_black.svg.png';
 const enemyImg = new Image();
-enemyImg.src = 'https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/38161/spaceship-clipart-md.png';
+enemyImg.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Space_Invader.svg/200px-Space_Invader.svg.png';
 
 
 // Input state
@@ -393,4 +393,19 @@ function gameLoop() {
 }
 
 // Initial call to start the game loop
-requestAnimationFrame(gameLoop);
+let loadedImagesCount = 0;
+const totalImages = 2; // playerImg and enemyImg
+
+playerImg.onload = () => {
+    loadedImagesCount++;
+    if (loadedImagesCount === totalImages) {
+        requestAnimationFrame(gameLoop);
+    }
+};
+
+enemyImg.onload = () => {
+    loadedImagesCount++;
+    if (loadedImagesCount === totalImages) {
+        requestAnimationFrame(gameLoop);
+    }
+};
