@@ -59,7 +59,10 @@ function startRound() {
         attackPower: 10 + (round - 1) * 2,
         fireRate: Math.max(500, 2000 - (round - 1) * 100), // Enemy shoots faster
         lastShotTime: 0,
-        direction: 1 // 1 for right, -1 for left
+        direction: 1, // 1 for right, -1 for left
+        targetX: Math.random() * (canvas.width - 60),
+        targetY: Math.random() * (canvas.height / 2 - 60),
+        targetUpdateTimer: 0
     };
 
     playerBullets = [];
@@ -185,26 +188,21 @@ function update() {
     });
 
 
-    // Player Shooting
+    // Enemy Movement (towards a random target)
     const now = Date.now();
-    if (mouse.isDown && now - player.lastShotTime > player.fireRate) {
-        player.lastShotTime = now;
-        const angle = Math.atan2(mouse.y - (player.y + player.height / 2), mouse.x - (player.x + player.width / 2));
-        playerBullets.push({
-            x: player.x + player.width / 2,
-            y: player.y + player.height / 2,
-            width: 8, height: 8,
-            color: '#00BFFF', // Deep Sky Blue
-            velocityX: Math.cos(angle) * 10,
-            velocityY: Math.sin(angle) * 10,
-            damage: player.bulletDamage
-        });
+    if (now - enemy.targetUpdateTimer > 2000) { // Update target every 2 seconds
+        enemy.targetX = Math.random() * (canvas.width - enemy.width);
+        enemy.targetY = Math.random() * (canvas.height / 2 - enemy.height); // Stay in top half
+        enemy.targetUpdateTimer = now;
     }
 
-    // Enemy Movement (Simple horizontal for now)
-    enemy.x += enemy.speed * enemy.direction;
-    if (enemy.x <= 0 || enemy.x + enemy.width >= canvas.width) {
-        enemy.direction *= -1;
+    // Move towards target
+    const dx = enemy.targetX - enemy.x;
+    const dy = enemy.targetY - enemy.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > 1) {
+        enemy.x += (dx / distance) * enemy.speed;
+        enemy.y += (dy / distance) * enemy.speed;
     }
 
     // Enemy Shooting (towards player)
@@ -235,7 +233,6 @@ function update() {
             enemy.health -= bullet.damage;
             playerBullets.splice(index, 1);
             if (enemy.health <= 0) {
-                round++;
                 showUpgradeScreen();
             }
         }
@@ -359,8 +356,9 @@ function draw() {
         ctx.textAlign = 'left';
         ctx.fillText(`Round: ${round}`, 10, 30);
         ctx.fillText(`Player Health: ${player.health}/${player.maxHealth}`, 10, 60);
-
-    } else if (gameState === 'gameOver') {
+        ctx.fillText(`Damage: ${player.bulletDamage}`, 10, 90);
+        ctx.fillText(`Speed: ${player.speed}`, 10, 120);
+ else if (gameState === 'gameOver') {
         ctx.fillStyle = '#FFFFFF';
         ctx.font = '48px Arial';
         ctx.textAlign = 'center';
@@ -372,16 +370,29 @@ function draw() {
         ctx.fillStyle = '#FFFFFF';
         ctx.font = '48px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(`Round ${round -1} Complete!`, canvas.width / 2, canvas.height / 2 - 100);
+        ctx.fillText(`Round ${round} Complete!`, canvas.width / 2, canvas.height / 2 - 150);
+
+        // Display stats for the NEXT enemy
+        const nextRound = round + 1;
+        const nextEnemyHealth = 100 + (nextRound - 1) * 20;
+        const nextEnemyAttack = 10 + (nextRound - 1) * 2;
+        const nextEnemySpeed = 3 + (nextRound - 1) * 0.3;
+        ctx.font = '22px Arial';
+        ctx.fillStyle = '#FFC107'; // Amber color
+        ctx.fillText(`Next Enemy Stats:`, canvas.width / 2, canvas.height / 2 - 100);
+        ctx.fillText(`Health: ${nextEnemyHealth}, Attack: ${nextEnemyAttack}, Speed: ${nextEnemySpeed.toFixed(1)}`, canvas.width / 2, canvas.height / 2 - 70);
+
+
         ctx.font = '36px Arial';
-        ctx.fillText('Choose Your Upgrade:', canvas.width / 2, canvas.height / 2 - 40);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('Choose Your Upgrade:', canvas.width / 2, canvas.height / 2 - 20);
 
         const buttonWidth = 200;
         const buttonHeight = 60;
         const startX = (canvas.width - (upgradeOptions.length * (buttonWidth + 20) - 20)) / 2;
         upgradeOptions.forEach((option, index) => {
             const x = startX + index * (buttonWidth + 20);
-            const y = canvas.height / 2 + 20;
+            const y = canvas.height / 2 + 40;
 
             ctx.fillStyle = '#007BFF'; // Blue button
             ctx.fillRect(x, y, buttonWidth, buttonHeight);
