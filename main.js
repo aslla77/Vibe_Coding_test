@@ -39,12 +39,45 @@ let gameState = 'start'; // 'start', 'playing', 'upgrade', 'gameOver'
 let round = 1;
 let selectedAircraft = '';
 
+// Helper for line-rectangle intersection (taken from common game development patterns)
+function lineRectIntersect(x1, y1, x2, y2, rx, ry, rw, rh) {
+    // Function to check if a line segment (x1,y1)-(x2,y2) intersects a rectangle (rx,ry,rw,rh)
+    // Check if the line intersects any of the rectangle's four edges
+    const left = lineLineIntersect(x1, y1, x2, y2, rx, ry, rx, ry + rh);
+    const right = lineLineIntersect(x1, y1, x2, y2, rx + rw, ry, rx + rw, ry + rh);
+    const top = lineLineIntersect(x1, y1, x2, y2, rx, ry, rx + rw, ry);
+    const bottom = lineLineIntersect(x1, y1, x2, y2, rx, ry + rh, rx + rw, ry + rh);
+
+    // If any of the edges intersect, the line intersects the rectangle
+    if (left || right || top || bottom) {
+        return true;
+    }
+    // Also check if either end point of the line is inside the rectangle
+    if (x1 >= rx && x1 <= rx + rw && y1 >= ry && y1 <= ry + rh) return true;
+    if (x2 >= rx && x2 <= rx + rw && y2 >= ry && y2 <= ry + rh) return true;
+
+    return false;
+}
+
+// Helper for line-line intersection
+function lineLineIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
+    // calculate the direction of the lines
+    const uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
+    const uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
+
+    // if uA and uB are between 0-1, lines are intersecting
+    if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+        return true;
+    }
+    return false;
+}
+
 // Player and Enemy objects (placeholder for now)
 let player = {};
 let enemy = {};
 let playerBullets = [];
 let enemyBullets = [];
-let lasers = [];
+let visualLasers = [];
 let boomerangs = [];
 let obstacles = [];
 let upgradeOptions = [];
@@ -89,7 +122,8 @@ function initGame() {
         bulletDamage: 10,
         fireRate: 300, // ms between shots
         lastShotTime: 0,
-        type: selectedAircraft
+        type: selectedAircraft,
+        maxBoomerangDistance: 200 // Initial boomerang range
     };
     startRound();
 }
@@ -153,7 +187,8 @@ function showUpgradeScreen() {
         { text: 'Increase Damage', action: () => player.bulletDamage += 5 },
         { text: 'Increase Fire Rate', action: () => player.fireRate = Math.max(50, player.fireRate - 25) },
         { text: 'Increase Max Health', action: () => { player.maxHealth += 20; player.health += 20; } },
-        { text: 'Increase Speed', action: () => player.speed += 1 }
+        { text: 'Increase Speed', action: () => player.speed += 1 },
+        { text: 'Increase Boomerang Range', action: () => player.maxBoomerangDistance += 50 } // New upgrade
     ];
 }
 
@@ -260,40 +295,54 @@ function update() {
                     damage: player.bulletDamage
                 });
                 break;
-            case 'triangle': // Shoots a laser
-                const laserLength = Math.max(canvas.width, canvas.height); // Make it long enough to cross the canvas
-                const laserSpeed = 30; // Very fast to appear instantaneous
+            case 'triangle': // Shoots a laser (instant hit-scan)
+                const playerCenterX = player.x + player.width / 2;
+                const playerCenterY = player.y + player.height / 2;
 
-                // Calculate the end point of the laser
-                const endX = player.x + player.width / 2 + Math.cos(angle) * laserLength;
-                const endY = player.y + player.height / 2 + Math.sin(angle) * laserLength;
+                const laserEndPointX = playerCenterX + Math.cos(angle) * canvas.width * 1.5; // Extend far beyond canvas
+                const laserEndPointY = playerCenterY + Math.sin(angle) * canvas.height * 1.5;
 
-                lasers.push({
-                    x: player.x + player.width / 2,
-                    y: player.y + player.height / 2,
-                    width: 5, // Thin beam
-                    height: 5, // Placeholder, will be adjusted in drawing
-                    color: '#FFD700', // Gold
-                    velocityX: Math.cos(angle) * laserSpeed, // Still uses velocity to travel quickly
-                    velocityY: Math.sin(angle) * laserSpeed,
-                    damage: player.bulletDamage * 0.8,
-                    lifeSpan: 5 // Laser disappears after a few frames
+                // Check for collision with enemy
+                if (lineRectIntersect(playerCenterX, playerCenterY, laserEndPointX, laserEndPointY, enemy.x, enemy.y, enemy.width, enemy.height)) {
+                    enemy.health -= player.bulletDamage * 0.8; // Apply damage
+                    if (enemy.health <= 0) {
+                        showUpgradeScreen();
+                    }
+                }
+
+                // Add a temporary visual laser beam
+                visualLasers.push({
+                    x1: playerCenterX,
+                    y1: playerCenterY,
+                    x2: laserEndPointX,
+                    y2: laserEndPointY,
+                    color: '#FFD700',
+                    life: 2 // Visible for 2 frames
                 });
                 break;
             case 'circle': // Throws a boomerang
                 // Only throw a new boomerang if the old one isn't on screen
                 if (boomerangs.length === 0) {
+                    const baseBoomerangSpeed = 8;
+                    // Max fireRate is 300ms, min is 50ms (from max Fire Rate upgrade)
+                    // Normalize fireRate to a 0-1 range (0 = fastest, 1 = slowest)
+                    const normalizedFireRate = (player.fireRate - 50) / (300 - 50); // From 0 to 1
+                    // Invert and scale: faster fireRate (lower ms) means higher speed multiplier
+                    const speedMultiplier = 1 + (1 - normalizedFireRate) * 0.5; // Up to 50% faster
+
+                    const currentBoomerangSpeed = baseBoomerangSpeed * speedMultiplier;
+
                     boomerangs.push({
                         x: player.x + player.width / 2,
                         y: player.y + player.height / 2,
                         width: 20,
                         height: 10,
                         color: '#90EE90', // Light green
-                        velocityX: Math.cos(angle) * 8,
-                        velocityY: Math.sin(angle) * 8,
+                        velocityX: Math.cos(angle) * currentBoomerangSpeed,
+                        velocityY: Math.sin(angle) * currentBoomerangSpeed,
                         damage: player.bulletDamage * 1.5,
                         state: 'out', // 'out' or 'returning'
-                        maxDistance: 200, // How far it goes before returning
+                        maxDistance: player.maxBoomerangDistance, // Use player's defined range
                         distanceTraveled: 0,
                         rotation: 0,
                         canDamage: true // To ensure it only hits the enemy once per throw
@@ -351,7 +400,9 @@ function update() {
         // State management
         if (boomerang.state === 'out' && boomerang.distanceTraveled >= boomerang.maxDistance) {
             boomerang.state = 'returning';
-            boomerang.canDamage = true; // Can hit again on the way back
+            // Boomerangs should only damage once per trip (outbound or inbound)
+            // Reset canDamage when it starts returning
+            boomerang.canDamage = true;
         }
 
         if (boomerang.state === 'returning') {
@@ -382,31 +433,6 @@ function update() {
         // Remove if it goes way off screen (failsafe)
         if (boomerang.x < -50 || boomerang.x > canvas.width + 50 || boomerang.y < -50 || boomerang.y > canvas.height + 50) {
             boomerangs.splice(index, 1);
-        }
-    });
-
-
-    // Update Lasers
-    lasers.forEach((laser, index) => {
-        laser.x += laser.velocityX;
-        laser.y += laser.velocityY;
-        laser.lifeSpan--;
-
-        if (laser.lifeSpan <= 0) {
-            lasers.splice(index, 1);
-            return; // Skip further processing for this laser as it's removed
-        }
-
-        if (checkCollision(laser, enemy)) {
-            enemy.health -= laser.damage;
-            lasers.splice(index, 1);
-            if (enemy.health <= 0) {
-                showUpgradeScreen();
-            }
-        }
-        // Remove if out of bounds (though lifeSpan should handle most cases)
-        else if (laser.x < -100 || laser.x > canvas.width + 100 || laser.y < -100 || laser.y > canvas.height + 100) {
-            lasers.splice(index, 1);
         }
     });
 
@@ -584,18 +610,19 @@ function draw() {
             ctx.restore();
         });
 
-        // Draw Lasers
-        lasers.forEach(laser => {
-            ctx.save();
-            ctx.fillStyle = laser.color;
-            const angle = Math.atan2(laser.velocityY, laser.velocityX);
-            ctx.translate(laser.x, laser.y);
-            ctx.rotate(angle);
+        // Draw Visual Lasers
+        visualLasers.forEach((laser, index) => {
+            ctx.strokeStyle = laser.color;
+            ctx.lineWidth = 5; // Thickness of the laser beam
+            ctx.beginPath();
+            ctx.moveTo(laser.x1, laser.y1);
+            ctx.lineTo(laser.x2, laser.y2);
+            ctx.stroke();
 
-            // Draw a long thin rectangle for the laser beam
-            ctx.fillRect(0, -laser.width / 2, 2000, laser.width); // Extend far, assume 2000 is enough
-
-            ctx.restore();
+            laser.life--;
+            if (laser.life <= 0) {
+                visualLasers.splice(index, 1);
+            }
         });
 
         // Draw Enemy Bullets
