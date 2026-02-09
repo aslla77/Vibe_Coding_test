@@ -300,8 +300,14 @@ function update() {
                 const playerCenterX = player.x + player.width / 2;
                 const playerCenterY = player.y + player.height / 2;
 
-                const laserEndPointX = playerCenterX + Math.cos(angle) * canvas.width * 1.5; // Extend far beyond canvas
-                const laserEndPointY = playerCenterY + Math.sin(angle) * canvas.height * 1.5;
+                // Calculate vector from player to mouse
+                const deltaX = mouse.x - playerCenterX;
+                const deltaY = mouse.y - playerCenterY;
+
+                // Extend the line through the mouse pointer
+                const extendFactor = 2; // Extend twice the distance from player to mouse
+                const laserEndPointX = playerCenterX + deltaX * extendFactor;
+                const laserEndPointY = playerCenterY + deltaY * extendFactor;
 
                 // Check for collision with enemy
                 if (lineRectIntersect(playerCenterX, playerCenterY, laserEndPointX, laserEndPointY, enemy.x, enemy.y, enemy.width, enemy.height)) {
