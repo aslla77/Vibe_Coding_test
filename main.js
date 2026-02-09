@@ -150,7 +150,8 @@ function startRound() {
 
     playerBullets = [];
     enemyBullets = [];
-    lasers = [];
+    visualLasers = [];
+    boomerangs = [];
     obstacles = generateObstacles(round);
 
     // Reset player's position and health for the new round
@@ -490,10 +491,7 @@ function update() {
             }
         });
     });
-    lasers.forEach((laser, lIndex) => { // Lasers can pass through obstacles
-        // For a beam, it doesn't get removed by obstacles, but if it hits, it could affect its visual perhaps.
-        // For now, let's assume it passes through.
-    });
+
     boomerangs.forEach((boomerang, bIndex) => {
         obstacles.forEach(obstacle => {
             if (checkCollision(boomerang, obstacle)) {
