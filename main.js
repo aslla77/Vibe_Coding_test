@@ -261,15 +261,23 @@ function update() {
                 });
                 break;
             case 'triangle': // Shoots a laser
+                const laserLength = Math.max(canvas.width, canvas.height); // Make it long enough to cross the canvas
+                const laserSpeed = 30; // Very fast to appear instantaneous
+
+                // Calculate the end point of the laser
+                const endX = player.x + player.width / 2 + Math.cos(angle) * laserLength;
+                const endY = player.y + player.height / 2 + Math.sin(angle) * laserLength;
+
                 lasers.push({
                     x: player.x + player.width / 2,
                     y: player.y + player.height / 2,
-                    width: 10,
-                    height: 4,
+                    width: 5, // Thin beam
+                    height: 5, // Placeholder, will be adjusted in drawing
                     color: '#FFD700', // Gold
-                    velocityX: Math.cos(angle) * 20, // Lasers are faster
-                    velocityY: Math.sin(angle) * 20,
-                    damage: player.bulletDamage * 0.8 // Laser might do slightly less damage per hit
+                    velocityX: Math.cos(angle) * laserSpeed, // Still uses velocity to travel quickly
+                    velocityY: Math.sin(angle) * laserSpeed,
+                    damage: player.bulletDamage * 0.8,
+                    lifeSpan: 5 // Laser disappears after a few frames
                 });
                 break;
             case 'circle': // Throws a boomerang
@@ -382,13 +390,22 @@ function update() {
     lasers.forEach((laser, index) => {
         laser.x += laser.velocityX;
         laser.y += laser.velocityY;
+        laser.lifeSpan--;
+
+        if (laser.lifeSpan <= 0) {
+            lasers.splice(index, 1);
+            return; // Skip further processing for this laser as it's removed
+        }
+
         if (checkCollision(laser, enemy)) {
             enemy.health -= laser.damage;
             lasers.splice(index, 1);
             if (enemy.health <= 0) {
                 showUpgradeScreen();
             }
-        } else if (laser.x < 0 || laser.x > canvas.width || laser.y < 0 || laser.y > canvas.height) {
+        }
+        // Remove if out of bounds (though lifeSpan should handle most cases)
+        else if (laser.x < -100 || laser.x > canvas.width + 100 || laser.y < -100 || laser.y > canvas.height + 100) {
             lasers.splice(index, 1);
         }
     });
@@ -447,12 +464,9 @@ function update() {
             }
         });
     });
-    lasers.forEach((laser, lIndex) => {
-        obstacles.forEach(obstacle => {
-            if (checkCollision(laser, obstacle)) {
-                lasers.splice(lIndex, 1);
-            }
-        });
+    lasers.forEach((laser, lIndex) => { // Lasers can pass through obstacles
+        // For a beam, it doesn't get removed by obstacles, but if it hits, it could affect its visual perhaps.
+        // For now, let's assume it passes through.
     });
     boomerangs.forEach((boomerang, bIndex) => {
         obstacles.forEach(obstacle => {
@@ -562,19 +576,26 @@ function draw() {
             ctx.translate(boomerang.x + boomerang.width / 2, boomerang.y + boomerang.height / 2);
             ctx.rotate(boomerang.rotation);
             ctx.fillStyle = boomerang.color;
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(-boomerang.width / 2, -boomerang.height / 2);
-            ctx.lineTo(boomerang.width / 2, boomerang.height / 2);
-            ctx.closePath();
-            ctx.fill();
+
+            // Draw two connected rectangles to form a boomerang shape
+            ctx.fillRect(-boomerang.width / 2, -boomerang.height / 4, boomerang.width, boomerang.height / 2);
+            ctx.fillRect(-boomerang.width / 4, -boomerang.height / 2, boomerang.width / 2, boomerang.height);
+
             ctx.restore();
         });
 
         // Draw Lasers
         lasers.forEach(laser => {
-             ctx.fillStyle = laser.color;
-             ctx.fillRect(laser.x, laser.y, laser.width, laser.height);
+            ctx.save();
+            ctx.fillStyle = laser.color;
+            const angle = Math.atan2(laser.velocityY, laser.velocityX);
+            ctx.translate(laser.x, laser.y);
+            ctx.rotate(angle);
+
+            // Draw a long thin rectangle for the laser beam
+            ctx.fillRect(0, -laser.width / 2, 2000, laser.width); // Extend far, assume 2000 is enough
+
+            ctx.restore();
         });
 
         // Draw Enemy Bullets
