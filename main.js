@@ -10,7 +10,7 @@ const enemyImage = new Image();
 
 let resourcesLoaded = false;
 let loadedCount = 0;
-const totalResources = 2; // Number of images to load
+const totalResources = 0; // No images to load anymore
 
 function checkAllResourcesLoaded() {
     loadedCount++;
@@ -20,11 +20,15 @@ function checkAllResourcesLoaded() {
     }
 }
 
-playerImage.onload = checkAllResourcesLoaded;
-enemyImage.onload = checkAllResourcesLoaded;
+// playerImage.onload = checkAllResourcesLoaded; // Not needed
+// enemyImage.onload = checkAllResourcesLoaded; // Not needed
 
-playerImage.src = '/Vibe_Coding_test/Gemini_Generated_Image_vgyitmvgyitmvgyi.png';
-enemyImage.src = '/Vibe_Coding_test/Gemini_Generated_Image_ao9cefao9cefao9c.png';
+// playerImage.src = '/Vibe_Coding_test/Gemini_Generated_Image_vgyitmvgyitmvgyi.png'; // Not needed
+// enemyImage.src = '/Vibe_Coding_test/Gemini_Generated_Image_ao9cefao9cefao9c.png'; // Not needed
+
+// Since there are no resources to load, call requestAnimationFrame immediately
+resourcesLoaded = true;
+requestAnimationFrame(gameLoop);
 
 
 canvas.width = 1000;
@@ -498,7 +502,10 @@ function drawPlayer(playerObj) {
             ctx.fill();
             break;
         case 'circle':
-            ctx.drawImage(playerImage, playerObj.x, playerObj.y, playerObj.width, playerObj.height);
+            ctx.fillStyle = '#007BFF'; // Blue
+            ctx.beginPath();
+            ctx.arc(playerObj.x + playerObj.width / 2, playerObj.y + playerObj.height / 2, playerObj.width / 2, 0, Math.PI * 2);
+            ctx.fill();
             break;
         default: // Default to square if something goes wrong
             ctx.fillStyle = '#007BFF';
@@ -510,7 +517,24 @@ function drawPlayer(playerObj) {
 
 // Function to draw an equilateral triangle for the enemy (pointing down)
 function drawEnemy(enemyObj) {
-    ctx.drawImage(enemyImage, enemyObj.x, enemyObj.y, enemyObj.width, enemyObj.height);
+    const x = enemyObj.x + enemyObj.width / 2;
+    const y = enemyObj.y + enemyObj.height / 2;
+    const outerRadius = enemyObj.width / 2;
+    const innerRadius = outerRadius / 2.5; // Adjust for desired star pointiness
+    const numPoints = 5;
+
+    ctx.fillStyle = '#FFD700'; // Gold color for the star
+    ctx.beginPath();
+
+    for (let i = 0; i < numPoints * 2; i++) {
+        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+        const angle = Math.PI / numPoints * i;
+        ctx.lineTo(x + radius * Math.sin(angle), y - radius * Math.cos(angle));
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#FFA500'; // Orange border
+    ctx.stroke();
 }
 
 
