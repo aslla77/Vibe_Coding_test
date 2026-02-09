@@ -6,8 +6,24 @@ const startScreen = document.getElementById('startScreen');
 const aircraftOptions = document.querySelectorAll('.aircraft-option');
 const startGameButton = document.getElementById('startGameButton');
 const playerImage = new Image();
-playerImage.src = '/Vibe_Coding_test/Gemini_Generated_Image_vgyitmvgyitmvgyi.png';
 const enemyImage = new Image();
+
+let resourcesLoaded = false;
+let loadedCount = 0;
+const totalResources = 2; // Number of images to load
+
+function checkAllResourcesLoaded() {
+    loadedCount++;
+    if (loadedCount === totalResources) {
+        resourcesLoaded = true;
+        requestAnimationFrame(gameLoop); // Start the game loop only after all resources are loaded
+    }
+}
+
+playerImage.onload = checkAllResourcesLoaded;
+enemyImage.onload = checkAllResourcesLoaded;
+
+playerImage.src = '/Vibe_Coding_test/Gemini_Generated_Image_vgyitmvgyitmvgyi.png';
 enemyImage.src = '/Vibe_Coding_test/Gemini_Generated_Image_ao9cefao9cefao9c.png';
 
 
@@ -25,6 +41,7 @@ let enemy = {};
 let playerBullets = [];
 let enemyBullets = [];
 let lasers = [];
+let boomerangs = [];
 let obstacles = [];
 let upgradeOptions = [];
 
@@ -225,29 +242,52 @@ function update() {
     // Player Shooting
     if (mouse.isDown && now - player.lastShotTime > player.fireRate) {
         player.lastShotTime = now;
-        if (player.type === 'circle') {
-             const angle = Math.atan2(mouse.y - (player.y + player.height / 2), mouse.x - (player.x + player.width / 2));
-             lasers.push({
-                x: player.x + player.width / 2,
-                y: player.y + player.height / 2,
-                width: 10,
-                height: 4,
-                color: '#FFD700', // Gold
-                velocityX: Math.cos(angle) * 20, // Lasers are faster
-                velocityY: Math.sin(angle) * 20,
-                damage: player.bulletDamage * 0.8 // Laser might do slightly less damage per hit but fires fast
-             });
-        } else {
-            const angle = Math.atan2(mouse.y - (player.y + player.height / 2), mouse.x - (player.x + player.width / 2));
-            playerBullets.push({
-                x: player.x + player.width / 2,
-                y: player.y + player.height / 2,
-                width: 8, height: 8,
-                color: '#00BFFF', // Deep Sky Blue
-                velocityX: Math.cos(angle) * 10,
-                velocityY: Math.sin(angle) * 10,
-                damage: player.bulletDamage
-            });
+        const angle = Math.atan2(mouse.y - (player.y + player.height / 2), mouse.x - (player.x + player.width / 2));
+
+        switch (player.type) {
+            case 'square': // Fires bullets
+                playerBullets.push({
+                    x: player.x + player.width / 2,
+                    y: player.y + player.height / 2,
+                    width: 8, height: 8,
+                    color: '#00BFFF', // Deep Sky Blue
+                    velocityX: Math.cos(angle) * 10,
+                    velocityY: Math.sin(angle) * 10,
+                    damage: player.bulletDamage
+                });
+                break;
+            case 'triangle': // Shoots a laser
+                lasers.push({
+                    x: player.x + player.width / 2,
+                    y: player.y + player.height / 2,
+                    width: 10,
+                    height: 4,
+                    color: '#FFD700', // Gold
+                    velocityX: Math.cos(angle) * 20, // Lasers are faster
+                    velocityY: Math.sin(angle) * 20,
+                    damage: player.bulletDamage * 0.8 // Laser might do slightly less damage per hit
+                });
+                break;
+            case 'circle': // Throws a boomerang
+                // Only throw a new boomerang if the old one isn't on screen
+                if (boomerangs.length === 0) {
+                    boomerangs.push({
+                        x: player.x + player.width / 2,
+                        y: player.y + player.height / 2,
+                        width: 20,
+                        height: 10,
+                        color: '#90EE90', // Light green
+                        velocityX: Math.cos(angle) * 8,
+                        velocityY: Math.sin(angle) * 8,
+                        damage: player.bulletDamage * 1.5,
+                        state: 'out', // 'out' or 'returning'
+                        maxDistance: 200, // How far it goes before returning
+                        distanceTraveled: 0,
+                        rotation: 0,
+                        canDamage: true // To ensure it only hits the enemy once per throw
+                    });
+                }
+                break;
         }
     }
 
@@ -259,12 +299,12 @@ function update() {
     }
 
     // Move towards target
-    const dx = enemy.targetX - enemy.x;
-    const dy = enemy.targetY - enemy.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance > 1) {
-        enemy.x += (dx / distance) * enemy.speed;
-        enemy.y += (dy / distance) * enemy.speed;
+    const dx_enemy = enemy.targetX - enemy.x;
+    const dy_enemy = enemy.targetY - enemy.y;
+    const distance_enemy = Math.sqrt(dx_enemy * dx_enemy + dy_enemy * dy_enemy);
+    if (distance_enemy > 1) {
+        enemy.x += (dx_enemy / distance_enemy) * enemy.speed;
+        enemy.y += (dy_enemy / distance_enemy) * enemy.speed;
     }
 
     // Enemy Shooting (towards player)
@@ -284,6 +324,56 @@ function update() {
             damage: enemy.attackPower
         });
     }
+
+    // Update Boomerangs
+    boomerangs.forEach((boomerang, index) => {
+        // Movement
+        boomerang.x += boomerang.velocityX;
+        boomerang.y += boomerang.velocityY;
+        boomerang.rotation += 0.2; // spin effect
+
+        const dx = boomerang.velocityX;
+        const dy = boomerang.velocityY;
+        boomerang.distanceTraveled += Math.sqrt(dx*dx + dy*dy);
+
+        // State management
+        if (boomerang.state === 'out' && boomerang.distanceTraveled >= boomerang.maxDistance) {
+            boomerang.state = 'returning';
+            boomerang.canDamage = true; // Can hit again on the way back
+        }
+
+        if (boomerang.state === 'returning') {
+            // Move back towards the player
+            const angleToPlayer = Math.atan2(
+                (player.y + player.height / 2) - boomerang.y,
+                (player.x + player.width / 2) - boomerang.x
+            );
+            const speed = Math.sqrt(boomerang.velocityX**2 + boomerang.velocityY**2);
+            boomerang.velocityX = Math.cos(angleToPlayer) * speed;
+            boomerang.velocityY = Math.sin(angleToPlayer) * speed;
+
+            // Check if boomerang is caught by player
+            if (checkCollision(boomerang, player)) {
+                boomerangs.splice(index, 1);
+            }
+        }
+
+        // Collision with enemy
+        if (boomerang.canDamage && checkCollision(boomerang, enemy)) {
+            enemy.health -= boomerang.damage;
+            boomerang.canDamage = false; // Prevent further damage until it returns
+             if (enemy.health <= 0) {
+                showUpgradeScreen();
+            }
+        }
+
+        // Remove if it goes way off screen (failsafe)
+        if (boomerang.x < -50 || boomerang.x > canvas.width + 50 || boomerang.y < -50 || boomerang.y > canvas.height + 50) {
+            boomerangs.splice(index, 1);
+        }
+    });
+
+
     // Update Lasers
     lasers.forEach((laser, index) => {
         laser.x += laser.velocityX;
@@ -360,6 +450,23 @@ function update() {
             }
         });
     });
+    boomerangs.forEach((boomerang, bIndex) => {
+        obstacles.forEach(obstacle => {
+            if (checkCollision(boomerang, obstacle)) {
+                // Boomerangs are durable, let's just reverse their velocity
+                // A simple collision response
+                const dx = (boomerang.x + boomerang.width / 2) - (obstacle.x + obstacle.width / 2);
+                if (Math.abs(dx) > boomerang.width / 2) { // Horizontal collision
+                    boomerang.velocityX *= -1;
+                } else { // Vertical collision
+                    boomerang.velocityY *= -1;
+                }
+                // Also trigger return state to avoid getting stuck
+                boomerang.state = 'returning';
+
+            }
+        });
+    });
 }
 
 // --- Drawing Functions ---
@@ -423,6 +530,21 @@ function draw() {
         playerBullets.forEach(bullet => {
             ctx.fillStyle = bullet.color;
             ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+        });
+
+        // Draw Boomerangs
+        boomerangs.forEach(boomerang => {
+            ctx.save();
+            ctx.translate(boomerang.x + boomerang.width / 2, boomerang.y + boomerang.height / 2);
+            ctx.rotate(boomerang.rotation);
+            ctx.fillStyle = boomerang.color;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-boomerang.width / 2, -boomerang.height / 2);
+            ctx.lineTo(boomerang.width / 2, boomerang.height / 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
         });
 
         // Draw Lasers
@@ -514,6 +636,11 @@ function draw() {
 
 // --- Game Loop ---
 function gameLoop() {
+    if (!resourcesLoaded) {
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+
     if(gameState === 'start') {
          // Draw start screen if it's not hidden
         if (!startScreen.classList.contains('hidden')) {
@@ -528,5 +655,4 @@ function gameLoop() {
 
 // Initial setup
 canvas.classList.add('hidden');
-// Initial call to start the game loop
-requestAnimationFrame(gameLoop);
+// The game loop will be started by checkAllResourcesLoaded once all images are loaded
