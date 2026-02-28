@@ -1,19 +1,55 @@
+:root {
+    --bg-color: #1a1a2e;
+    --text-color: #e0e0e0;
+    --accent-color: #00bcd4;
+    --card-bg: linear-gradient(145deg, #2a2a4a, #1a1a2e);
+    --card-hover-bg: linear-gradient(145deg, #3a3a5a, #2a2a4e);
+    --screen-overlay: rgba(0, 0, 0, 0.95);
+    --canvas-bg: #000;
+}
+
+body.light-mode {
+    --bg-color: #f0f0f0;
+    --text-color: #333;
+    --accent-color: #008ba3;
+    --card-bg: linear-gradient(145deg, #ffffff, #e6e6e6);
+    --card-hover-bg: linear-gradient(145deg, #e6e6e6, #d9d9d9);
+    --screen-overlay: rgba(255, 255, 255, 0.95);
+    --canvas-bg: #fff;
+}
+
 body {
     margin: 0;
     overflow: hidden;
-    background-color: #1a1a2e; /* Darker, more atmospheric background */
-    color: #e0e0e0;
-    font-family: 'Space Mono', monospace; /* Modern, techy font */
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Space Mono', monospace;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#themeToggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 2000;
+    font-family: inherit;
 }
 
 h1 {
-    color: #00bcd4; /* Cyan-like color */
+    color: var(--accent-color);
     margin-bottom: 30px;
     font-size: 3.5em;
     text-shadow: 0 0 15px rgba(0, 188, 212, 0.8), 0 0 30px rgba(0, 188, 212, 0.4);
@@ -21,32 +57,31 @@ h1 {
 }
 
 canvas {
-    background-color: #000;
-    border: 3px solid #00bcd4;
+    background-color: var(--canvas-bg);
+    border: 3px solid var(--accent-color);
     box-shadow: 0 0 25px rgba(0, 188, 212, 0.6), 0 0 50px rgba(0, 188, 212, 0.2);
-    display: block; /* Remove extra space below canvas */
-    max-width: 90vw; /* Responsive canvas size */
+    display: block;
+    max-width: 90vw;
     max-height: 80vh;
 }
 
-/* Game Selection Screen Styles */
 .screen {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.95); /* More opaque overlay */
+    background-color: var(--screen-overlay);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure it's on top */
-    color: #e0e0e0;
+    z-index: 1000;
+    color: var(--text-color);
 }
 
 .screen h2 {
-    color: #00bcd4;
+    color: var(--accent-color);
     margin-bottom: 50px;
     font-size: 3em;
     text-shadow: 0 0 12px rgba(0, 188, 212, 0.9), 0 0 25px rgba(0, 188, 212, 0.5);
@@ -54,18 +89,18 @@ canvas {
 
 .game-list {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 columns for games */
+    grid-template-columns: repeat(3, 1fr);
     gap: 25px;
     max-width: 1000px;
     margin-bottom: 50px;
 }
 
 .game-option {
-    background: linear-gradient(145deg, #2a2a4a, #1a1a2e); /* Gradient background */
-    border: 2px solid #00bcd4;
+    background: var(--card-bg);
+    border: 2px solid var(--accent-color);
     border-radius: 12px;
     padding: 25px;
-    color: #e0e0e0;
+    color: var(--text-color);
     font-size: 1.5em;
     font-weight: bold;
     cursor: pointer;
@@ -78,26 +113,14 @@ canvas {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     letter-spacing: 0.5px;
+    font-family: inherit;
 }
 
 .game-option:hover {
-    background: linear-gradient(145deg, #3a3a5a, #2a2a4e);
+    background: var(--card-hover-bg);
     box-shadow: 0 0 20px rgba(0, 188, 212, 0.8), 0 0 30px rgba(0, 188, 212, 0.4);
     transform: translateY(-8px) scale(1.02);
     border-color: #00e4ff;
-}
-
-.game-option.selected {
-    background: #00bcd4;
-    color: #1a1a2e;
-    box-shadow: 0 0 25px rgba(0, 188, 212, 1), 0 0 40px rgba(0, 188, 212, 0.6);
-    transform: scale(1.05);
-    border-color: #e0e0e0;
-}
-
-.game-option.selected span {
-    color: #1a1a2e;
-    font-weight: bold;
 }
 
 .hidden {
