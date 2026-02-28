@@ -1,46 +1,47 @@
-# Blueprint for 2D Dogfight Game
+# Blueprint for Game Arcade
 
 ## Project Overview
-This project aims to create a dynamic 2D dogfight game where the player controls a plane against an AI-controlled opponent. The game will feature a progressive difficulty system, with both the player and enemy evolving their capabilities across rounds, ensuring a continuously challenging "control fight" experience. Obstacles will be introduced in later rounds to add strategic complexity.
+This project is evolving into a Game Arcade, providing a selection of casual games for the user. The initial focus is on creating a robust game selection mechanism and integrating existing and new game modules. The 2D Dogfight, Brick Breaker, and Tetris games are now implemented, with placeholders for more to come.
 
-## Style, Design, and Features Implemented (Initial State)
--   **Application Type:** 2D Web Game.
--   **Core Game Loop:** Utilizes `requestAnimationFrame` for smooth animations and game state updates.
--   **Player Plane:**
-    *   **Movement:** Controlled by arrow keys (Up, Down, Left, Right).
-    *   **Shooting:** Fires bullets in the direction of the mouse cursor upon mouse click.
--   **Enemy AI Plane:**
-    *   Computer-controlled, with basic AI logic to move and shoot towards the player.
--   **Dynamic Difficulty / Progression System:**
-    *   Starts with weaker enemies.
-    *   **Round-based:** As rounds increase, enemies become stronger (increased health, speed, attack power).
-    *   **Player Scaling:** Player's stats (e.g., bullet damage, fire rate, health) will incrementally improve, or be presented as upgrade choices, to maintain balance.
--   **Obstacles:**
-    *   Introduced in higher rounds to add strategic complexity. Initially, these will be simple static shapes.
--   **Game States:** Will include a start screen, active gameplay, game over, and round completion/upgrade selection screens.
--   **Basic UI:** Displays essential information like player health, enemy health, current round, and possibly score.
+## Style, Design, and Features Implemented (Current Version)
 
-## Key Technologies
--   **HTML5 Canvas:** The primary technology for rendering all game visuals (planes, bullets, obstacles, UI).
--   **JavaScript (ES Modules):** For implementing all game logic, physics, AI, input handling, and state management.
--   **CSS:** For basic styling of the web page, centering the canvas, and font presentation.
+### Global Application Structure
+*   **Application Type:** Web-based Game Arcade.
+*   **Entry Point:** `index.html` serves as the main entry point, hosting the game selection screen and a container for individual games.
+*   **Main Script (`main.js`):** Acts as a game manager, orchestrating the display of the game selection screen, loading and launching selected game modules, and managing transitions between them.
+*   **Modular Game Design:** Each game is encapsulated in its own JavaScript module (e.g., `airplaneGame.js`, `brickBreakerGame.js`, `tetrisGame.js`), responsible for its own logic, rendering, and lifecycle.
 
-## Visual Design & UX
--   **Aesthetics:** The initial design will be clean and functional, employing simple colored geometric shapes (rectangles, circles) to represent planes, bullets, and obstacles. This allows for rapid prototyping and ensures core gameplay mechanics are solid before aesthetic enhancements. Placeholder sprites may be considered later if explicitly requested or if deemed necessary for clarity without adding significant complexity.
--   **Layout:** The game canvas will be centrally positioned on the web page. UI elements (health bars, round number) will be placed intuitively, typically at the top or bottom of the canvas.
--   **Interactivity:** Emphasizes smooth and responsive player controls for an engaging combat experience. Visual cues will indicate successful hits, damage taken, and state transitions (e.g., round start, game over).
+### Game Selection Screen
+*   **HTML (`index.html`):** Features a dedicated `div` (`#gameSelectionScreen`) to display a list of available games.
+*   **CSS (`style.css`):** Provides a visually appealing and responsive layout for the game selection, using a grid for game options and modern CSS for styling effects (gradients, shadows, transitions). Includes responsive adjustments for various screen sizes.
+*   **User Interaction:** Users can select a game by clicking on its respective button. The game manager (`main.js`) handles the loading and starting of the chosen game.
 
-## Plan for Current Task: Implement Enemy Image and Git Push
+### Integrated Games
+*   **1. 2D Dogfight (`airplaneGame.js`):**
+    *   **Description:** The original 2D dogfight game, refactored into a modular structure.
+    *   **Features:** Player movement (keyboard), shooting (mouse), enemy AI, dynamic difficulty with rounds, upgrade system, obstacles.
+    *   **Integration:** Now initialized and started by `main.js` within a dedicated `gameContainer`.
+*   **2. Brick Breaker (`brickBreakerGame.js`):**
+    *   **Description:** A classic arcade game where the player controls a paddle to bounce a ball and break bricks.
+    *   **Features:** Paddle movement, ball physics and collision with walls, paddle, and bricks. Scoring and lives system. Game over/win states.
+    *   **Integration:** Fully implemented and integrated with the game manager.
+*   **3. Tetris (`tetrisGame.js`):**
+    *   **Description:** A classic tile-matching puzzle video game.
+    *   **Features:** Falling tetrominoes, rotation, horizontal movement, collision detection with other blocks and boundaries. Line clearing, scoring, and level progression.
+    *   **Integration:** Fully implemented and integrated with the game manager.
+*   **Other Games (Placeholders):** 6 additional game slots are available on the selection screen, currently showing "Coming Soon!".
+
+### Key Technologies
+*   **HTML5:** For structuring the game arcade and individual game interfaces.
+*   **CSS3:** For styling the entire application, focusing on modern aesthetics, responsiveness, and interactive elements. Uses `Space Mono` font for a techy feel.
+*   **JavaScript (ES Modules):** Core language for all game logic, modularization, and game management.
+*   **HTML5 Canvas:** Each game module creates and manages its own canvas for rendering.
+
+## Plan for Current Task: Finalize and Commit Changes
 
 ### Objective
-To replace the enemy's default shape with a user-provided image and then push all changes to GitHub.
+To ensure all implemented features are documented and committed to the Git repository.
 
 ### Steps
-1.  **Update `blueprint.md` (Status: completed):** Document the new feature and the plan.
-2.  **Modify `main.js` (Status: pending):**
-    *   Load the user-provided image for the enemy.
-    *   Modify the `drawEnemyTriangle` function (or create a new `drawEnemy` function) to draw the image instead of the triangle shape.
-3.  **Git Push (Status: pending):**
-    *   Stage all modified files, including the new enemy image file.
-    *   Create a commit with a descriptive message.
-    *   Push the commit to the remote repository.
+1.  **Update `blueprint.md` (Status: completed):** Document the newly implemented games and any changes to the overall arcade structure.
+2.  **Stage and Commit Changes (Status: pending):** Commit all changes to the Git repository.

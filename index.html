@@ -7,27 +7,41 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>2D Dogfight</h1>
-    <div id="startScreen" class="screen">
-        <h2>Choose Your Aircraft</h2>
-        <div class="aircraft-selection">
-            <button class="aircraft-option" data-type="square">
-                <div class="shape square"></div>
-                <span>Square</span>
+    <h1>Game Arcade</h1>
+    <div id="gameSelectionScreen" class="screen">
+        <h2>Select Your Game</h2>
+        <div class="game-list">
+            <button class="game-option" data-game="airplane">
+                <span>1. 2D Dogfight</span>
             </button>
-            <button class="aircraft-option" data-type="triangle">
-                <div class="shape triangle"></div>
-                <span>Triangle</span>
+            <button class="game-option" data-game="brickbreaker">
+                <span>2. Brick Breaker</span>
             </button>
-            <button class="aircraft-option" data-type="circle">
-                <img src="/Vibe_Coding_test/Gemini_Generated_Image_vgyitmvgyitmvgyi.png" alt="Circle" class="shape circle">
-                <span>Circle</span>
+            <button class="game-option" data-game="tetris">
+                <span>3. Tetris</span>
+            </button>
+            <button class="game-option" data-game="snake">
+                <span>4. Snake</span>
+            </button>
+            <button class="game-option" data-game="game5">
+                <span>5. Coming Soon</span>
+            </button>
+            <button class="game-option" data-game="game6">
+                <span>6. Coming Soon</span>
+            </button>
+            <button class="game-option" data-game="game7">
+                <span>7. Coming Soon</span>
+            </button>
+            <button class="game-option" data-game="game8">
+                <span>8. Coming Soon</span>
+            </button>
+            <button class="game-option" data-game="game9">
+                <span>9. Coming Soon</span>
             </button>
         </div>
-        <button id="startGameButton" disabled>Start Game</button>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
+    <div id="gameContainer"></div>
     <script type="module" src="main.js"></script>
 </body>
 </html>
