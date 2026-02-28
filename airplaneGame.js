@@ -426,7 +426,8 @@ function draw() {
         });
         obstacles.forEach(o => { ctx.fillStyle = o.color; ctx.fillRect(o.x, o.y, o.width, o.height); });
 
-        ctx.fillStyle = 'white'; ctx.font = '20px Arial'; ctx.textAlign = 'left';
+        const textColor = getComputedStyle(document.body).getPropertyValue('--text-color');
+        ctx.fillStyle = textColor; ctx.font = '20px Arial'; ctx.textAlign = 'left';
         ctx.fillText(`Round: ${round} | Health: ${Math.floor(player.health)}`, 10, 30);
         ctx.textAlign = 'right';
         ctx.fillText(`Enemy: ${Math.floor(enemy.health)}`, canvas.width - 10, 30);

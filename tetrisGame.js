@@ -255,8 +255,9 @@ function drawPiece(piece) {
 }
 
 function drawUI() {
+    const textColor = getComputedStyle(document.body).getPropertyValue('--text-color');
     // Score, Level, Lines Cleared
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = textColor;
     ctx.font = '20px Arial';
     ctx.textAlign = 'left';
     ctx.fillText('Score: ' + score, 5, 25);

@@ -142,7 +142,10 @@ function update() {
 
 // --- Drawing ---
 function draw() {
-    ctx.fillStyle = 'black';
+    const canvasBg = getComputedStyle(document.body).getPropertyValue('--canvas-bg');
+    const textColor = getComputedStyle(document.body).getPropertyValue('--text-color');
+
+    ctx.fillStyle = canvasBg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw snake
@@ -156,7 +159,7 @@ function draw() {
     ctx.fillRect(food.x * GRID_SIZE, food.y * GRID_SIZE, GRID_SIZE - 2, GRID_SIZE - 2);
 
     // Draw UI
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = textColor;
     ctx.font = '20px Arial';
     ctx.textAlign = 'left';
     ctx.fillText('Score: ' + score, 10, 25);
@@ -169,7 +172,7 @@ function draw() {
     if (gameOver) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = 'white'; // Keep Game Over text white for contrast on dark overlay
         ctx.font = '40px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
@@ -193,9 +196,6 @@ function gameLoop(currentTime) {
 
 function returnToMenuOnce() {
     canvas.removeEventListener('click', returnToMenuOnce);
-    // The manager will handle the rest if we just stop
     stop();
-    // In main.js we will need a way to detect this. 
-    // For now, let's assume we dispatch an event.
     window.dispatchEvent(new CustomEvent('gameStopped'));
 }
