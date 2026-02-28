@@ -76,7 +76,7 @@ export function init(containerElement, options = {}) {
 }
 
 function resetGame() {
-    paddle = { height: PADDLE_HEIGHT, width: PADDLE_WIDTH, x: (canvas.width - PADDLE_WIDTH) / 2, y: canvas.height - PADDLE_HEIGHT - 10, dx: 7 };
+    paddle = { height: PADDLE_HEIGHT, width: PADDLE_WIDTH, x: (canvas.width - PADDLE_WIDTH) / 2, y: canvas.height - PADDLE_HEIGHT - 10, dx: 10 };
     balls = [{ x: canvas.width / 2, y: paddle.y - BALL_RADIUS, dx: 3, dy: -3, radius: BALL_RADIUS }];
     items = [];
     score = 0;
@@ -207,7 +207,6 @@ function update() {
 
         if (ball.x > paddle.x && ball.x < paddle.x + paddle.width && ball.y + ball.radius > paddle.y) {
             ball.dy = -Math.abs(ball.dy);
-            // Add some variation based on where it hit the paddle
             const hitPoint = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
             ball.dx = hitPoint * 5;
         }
@@ -244,10 +243,10 @@ function update() {
         else resetBallOnPaddle();
     }
 
-    // Update items
+    // Update items - SLOWER speed
     for (let i = items.length - 1; i >= 0; i--) {
         const item = items[i];
-        item.y += 3;
+        item.y += 1.5; // Decreased from 3 to 1.5
 
         if (item.y > canvas.height) items.splice(i, 1);
         else if (item.x > paddle.x && item.x < paddle.x + paddle.width && item.y + ITEM_SIZE > paddle.y) {
@@ -271,7 +270,7 @@ function applyItem(type) {
         balls.push(...newBalls);
     } else if (type === ITEM_TYPES.POWER) {
         powerBallActive = true;
-        powerBallTimer = 600; // 10 seconds at 60fps
+        powerBallTimer = 600; 
     }
 }
 
