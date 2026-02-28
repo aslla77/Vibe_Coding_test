@@ -1,6 +1,6 @@
 A simple HTML/JS/CSS starter template
 
-This is my Vibe coding test repositories. -v3
+This is my Vibe coding test repositories.
 
 2026/02/05
 
