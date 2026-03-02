@@ -391,6 +391,8 @@ function nextRoundOnce() {
     canvas.removeEventListener('click', nextRoundOnce);
     round++;
     setupRound();
+    // Restart the game loop
+    animationFrameId = requestAnimationFrame(gameLoop);
 }
 
 function returnToMenuOnce() {
