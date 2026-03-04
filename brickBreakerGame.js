@@ -21,6 +21,8 @@ let score = 0;
 let lives = 3;
 let powerBallActive = false;
 let powerBallTimer = 0;
+let widePaddleActive = false;
+let widePaddleTimer = 0;
 
 // Game settings
 const PADDLE_WIDTH = 120; // Slightly wider for better feel
@@ -37,7 +39,8 @@ const ITEM_SIZE = 22;
 
 const ITEM_TYPES = {
     MULTI: { color: '#00FF00', label: 'M' }, // Multi Ball
-    POWER: { color: '#FFFF00', label: 'P' }  // Power Ball (Penetrating)
+    POWER: { color: '#FFFF00', label: 'P' }, // Power Ball (Penetrating)
+    WIDE: { color: '#FF00FF', label: 'W' }   // Wide Paddle
 };
 
 // Input handling
@@ -55,7 +58,7 @@ function handleKeyUp(e) {
 }
 
 function handleMouseMove(e) {
-    if (!gameStarted || gameOver || roundClear) return;
+    if (!gameStarted || gameOver || roundClear || widePaddleActive) return;
     const relativeX = e.clientX - canvas.getBoundingClientRect().left;
     if (relativeX > 0 && relativeX < canvas.width) {
         paddle.x = relativeX - paddle.width / 2;
@@ -91,6 +94,8 @@ function setupRound() {
     roundClear = false;
     powerBallActive = false;
     powerBallTimer = 0;
+    widePaddleActive = false;
+    widePaddleTimer = 0;
     items = [];
     
     // Difficulty increases with rounds
@@ -146,7 +151,7 @@ export function stop() {
 function drawPaddle() {
     ctx.beginPath();
     ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-    ctx.fillStyle = '#0095DD';
+    ctx.fillStyle = widePaddleActive ? '#FF00FF' : '#0095DD';
     ctx.fill();
     ctx.closePath();
 }
@@ -218,13 +223,20 @@ function drawUI() {
         ctx.fillStyle = '#FFFF00';
         ctx.fillText('POWER BALL ACTIVE!', canvas.width/2, 30);
     }
+    if (widePaddleActive) {
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#FF00FF';
+        ctx.fillText('WIDE PADDLE ACTIVE!', canvas.width/2, 60);
+    }
 }
 
 function update() {
     if (gameOver || roundClear) return;
 
-    if (keys.ArrowLeft && paddle.x > 0) paddle.x -= paddle.dx;
-    else if (keys.ArrowRight && paddle.x + paddle.width < canvas.width) paddle.x += paddle.dx;
+    if (!widePaddleActive) {
+        if (keys.ArrowLeft && paddle.x > 0) paddle.x -= paddle.dx;
+        else if (keys.ArrowRight && paddle.x + paddle.width < canvas.width) paddle.x += paddle.dx;
+    }
 
     if (!gameStarted) {
         balls[0].x = paddle.x + paddle.width / 2;
@@ -235,6 +247,15 @@ function update() {
     if (powerBallActive) {
         powerBallTimer--;
         if (powerBallTimer <= 0) powerBallActive = false;
+    }
+
+    if (widePaddleActive) {
+        widePaddleTimer--;
+        if (widePaddleTimer <= 0) {
+            widePaddleActive = false;
+            paddle.width = PADDLE_WIDTH;
+            paddle.x = (canvas.width - paddle.width) / 2;
+        }
     }
 
     // Update balls
@@ -300,8 +321,12 @@ function update() {
 
     if (balls.length === 0) {
         lives--;
-        if (lives === 0) gameOver = true;
-        else resetBallOnPaddle();
+        if (lives <= 0) {
+            lives = 0;
+            gameOver = true;
+        } else {
+            resetBallOnPaddle();
+        }
     }
 
     // Update items
@@ -327,15 +352,22 @@ function applyItem(type) {
     } else if (type === ITEM_TYPES.POWER) {
         powerBallActive = true;
         powerBallTimer = 600; 
+    } else if (type === ITEM_TYPES.WIDE) {
+        widePaddleActive = true;
+        widePaddleTimer = 300; // 5 seconds at 60fps
+        paddle.width = canvas.width;
+        paddle.x = 0;
     }
 }
 
 function resetBallOnPaddle() {
-    const speed = 5 + (round * 0.5);
+    const speed = Math.min(10, 6 + (round * 0.3));
     balls = [{ x: paddle.x + paddle.width / 2, y: paddle.y - BALL_RADIUS, dx: speed, dy: -speed, radius: BALL_RADIUS }];
     gameStarted = false;
     items = [];
     powerBallActive = false;
+    widePaddleActive = false;
+    paddle.width = PADDLE_WIDTH;
 }
 
 function gameLoop() {
