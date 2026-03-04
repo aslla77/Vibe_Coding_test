@@ -236,11 +236,11 @@ function showUpgradeScreen() {
         ];
     }
 
-    // Mix and select 5 upgrades (or all if fewer)
+    // Mix and select 6 upgrades (or all if fewer) to fit a 3x2 grid
     const allAvailable = [...specificUpgrades, ...commonUpgrades];
     upgradeOptions = [];
     const pool = [...allAvailable];
-    for (let i = 0; i < 5 && pool.length > 0; i++) {
+    for (let i = 0; i < 6 && pool.length > 0; i++) {
         const index = Math.floor(Math.random() * pool.length);
         upgradeOptions.push(pool.splice(index, 1)[0]);
     }
@@ -480,12 +480,30 @@ function draw() {
         } else if (gameState === 'upgrade') {
             ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0,0,canvas.width,canvas.height);
             ctx.fillStyle = 'white'; ctx.font = '36px Arial'; ctx.textAlign = 'center';
-            ctx.fillText('Choose Upgrade', canvas.width/2, 200);
+            ctx.fillText('Choose Upgrade', canvas.width/2, 150);
+            
+            const btnW = 250;
+            const btnH = 80;
+            const gapX = 30;
+            const gapY = 30;
+            const totalWidth = (btnW * 3) + (gapX * 2);
+            const startX = (canvas.width - totalWidth) / 2;
+            const startY = 250;
+
             upgradeOptions.forEach((o, i) => {
-                const x = (canvas.width - 1000) / 2 + i * 210; const y = 300;
-                ctx.fillStyle = '#007BFF'; ctx.fillRect(x, y, 200, 60);
-                ctx.fillStyle = 'white'; ctx.font = '18px Arial'; ctx.fillText(o.text, x + 100, y + 35);
-                o.x = x; o.y = y; o.width = 200; o.height = 60;
+                const col = i % 3;
+                const row = Math.floor(i / 3);
+                const x = startX + col * (btnW + gapX);
+                const y = startY + row * (btnH + gapY);
+                
+                ctx.fillStyle = '#007BFF';
+                ctx.fillRect(x, y, btnW, btnH);
+                ctx.fillStyle = 'white';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(o.text, x + btnW / 2, y + btnH / 2 + 8);
+                
+                o.x = x; o.y = y; o.width = btnW; o.height = btnH;
             });
         }
     }

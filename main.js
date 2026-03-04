@@ -8,6 +8,8 @@ import * as memoryGame from './memoryGame.js';
 
 const gameSelectionScreen = document.getElementById('gameSelectionScreen');
 const gameContainer = document.getElementById('gameContainer');
+const gameUI = document.getElementById('gameUI');
+const returnToMenuBtn = document.getElementById('returnToMenu');
 const gameOptions = document.querySelectorAll('.game-option');
 const themeToggle = document.getElementById('themeToggle');
 
@@ -27,6 +29,7 @@ const games = {
 
 function showGameSelection() {
     gameContainer.classList.add('hidden');
+    gameUI.classList.add('hidden');
     gameSelectionScreen.classList.remove('hidden');
     if (currentGame) {
         currentGame.stop();
@@ -44,6 +47,7 @@ function startGame(gameId, options = {}) {
         currentGame = gameModule;
         gameSelectionScreen.classList.add('hidden');
         gameContainer.classList.remove('hidden');
+        gameUI.classList.remove('hidden');
         currentGame.init(gameContainer, options);
         currentGame.start();
     } else {
@@ -57,6 +61,10 @@ gameOptions.forEach(option => {
         const gameId = option.dataset.game;
         startGame(gameId);
     });
+});
+
+returnToMenuBtn.addEventListener('click', () => {
+    showGameSelection();
 });
 
 // Theme toggle logic

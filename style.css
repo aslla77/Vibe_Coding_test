@@ -176,7 +176,32 @@ h1 {
     width: 100%;
     display: flex;
     justify-content: center;
-    padding: 2rem;
+    padding: 1rem;
+}
+
+#gameUI {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+#returnToMenu {
+    padding: 0.6rem 1.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    color: var(--text-dark);
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#returnToMenu:hover {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 0 20px var(--accent-glow);
 }
 
 canvas {
@@ -184,6 +209,8 @@ canvas {
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
     max-width: 100%;
     height: auto !important;
+    display: block;
+    margin: 0 auto;
 }
 
 footer {
