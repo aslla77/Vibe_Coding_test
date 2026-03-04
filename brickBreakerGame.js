@@ -97,7 +97,7 @@ function setupRound() {
     brickRowCount = Math.min(8, 2 + round); 
     
     paddle = { height: PADDLE_HEIGHT, width: PADDLE_WIDTH, x: (canvas.width - PADDLE_WIDTH) / 2, y: canvas.height - PADDLE_HEIGHT - 10, dx: 12 };
-    const speed = 5 + (round * 0.5); // Faster ball speed
+    const speed = Math.min(10, 6 + (round * 0.3)); // Capped speed for consistency
     balls = [{ x: canvas.width / 2, y: paddle.y - BALL_RADIUS, dx: speed, dy: -speed, radius: BALL_RADIUS }];
     
     createBricks();
