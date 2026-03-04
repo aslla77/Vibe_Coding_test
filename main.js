@@ -76,3 +76,10 @@ window.addEventListener('gameStopped', () => {
 
 // Initial display
 showGameSelection();
+
+// Prevent default scrolling for arrow keys when a game is active
+window.addEventListener('keydown', (e) => {
+    if (currentGame && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+    }
+}, { passive: false });

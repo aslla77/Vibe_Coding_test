@@ -134,7 +134,6 @@ function clearLines() {
         linesCleared += linesToClear;
         if (linesCleared >= level * 10 && level < 5) { // Level up every 10 lines, max level 5
             level++;
-            console.log('Level Up! New Level:', level);
         }
     }
 }
@@ -202,20 +201,22 @@ function resetGame() {
     level = 1;
     linesCleared = 0;
     gameOver = false;
-    lastDropTime = 0;
+    lastDropTime = performance.now();
 }
 
 // --- Start and Stop functions for the game manager ---
 export function start() {
-    console.log('Tetris Game Started');
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+    }
     resetGame();
     animationFrameId = requestAnimationFrame(gameLoop);
 }
 
 export function stop() {
-    console.log('Tetris Game Stopped');
     if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
     }
     // Remove event listeners
     document.removeEventListener('keydown', handleKeyDown);

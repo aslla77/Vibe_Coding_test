@@ -83,18 +83,22 @@ function resetGame() {
     gameOver = false;
     gameStarted = false;
     speed = 7;
+    lastUpdateTime = performance.now();
 }
 
 // --- Game Start/Stop ---
 export function start() {
-    console.log('Snake Game Started');
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+    }
+    lastUpdateTime = performance.now();
     animationFrameId = requestAnimationFrame(gameLoop);
 }
 
 export function stop() {
-    console.log('Snake Game Stopped');
     if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
     }
     document.removeEventListener('keydown', handleKeyDown);
     if (canvas && canvas.parentNode) {
