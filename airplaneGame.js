@@ -142,7 +142,10 @@ function initGame() {
         fireRate: 300,
         lastShotTime: 0,
         type: selectedAircraft,
-        maxBoomerangDistance: 250
+        maxBoomerangDistance: 250,
+        bulletCount: 1,
+        laserWidth: 5,
+        boomerangCount: 1
     };
     startRound();
 }
@@ -208,13 +211,39 @@ function generateObstacles(currentRound) {
 
 function showUpgradeScreen() {
     gameState = 'upgrade';
-    upgradeOptions = [
+    // Common upgrades
+    const commonUpgrades = [
         { text: 'Increase Damage', action: () => player.bulletDamage += 5 },
         { text: 'Increase Fire Rate', action: () => player.fireRate = Math.max(50, player.fireRate - 25) },
         { text: 'Increase Max Health', action: () => { player.maxHealth += 20; player.health += 20; } },
-        { text: 'Increase Speed', action: () => player.speed += 1 },
-        { text: 'Increase Boomerang Range', action: () => player.maxBoomerangDistance += 50 }
+        { text: 'Increase Speed', action: () => player.speed += 1 }
     ];
+
+    // Character specific upgrades
+    let specificUpgrades = [];
+    if (player.type === 'square') {
+        specificUpgrades = [
+            { text: 'Extra Bullet', action: () => player.bulletCount = Math.min(5, player.bulletCount + 1) }
+        ];
+    } else if (player.type === 'triangle') {
+        specificUpgrades = [
+            { text: 'Wider Laser', action: () => player.laserWidth += 10 }
+        ];
+    } else if (player.type === 'circle') {
+        specificUpgrades = [
+            { text: 'Extra Boomerang', action: () => player.boomerangCount = Math.min(3, player.boomerangCount + 1) },
+            { text: 'Increase Range', action: () => player.maxBoomerangDistance += 100 }
+        ];
+    }
+
+    // Mix and select 5 upgrades (or all if fewer)
+    const allAvailable = [...specificUpgrades, ...commonUpgrades];
+    upgradeOptions = [];
+    const pool = [...allAvailable];
+    for (let i = 0; i < 5 && pool.length > 0; i++) {
+        const index = Math.floor(Math.random() * pool.length);
+        upgradeOptions.push(pool.splice(index, 1)[0]);
+    }
 }
 
 function checkCollision(rect1, rect2) {
@@ -248,29 +277,36 @@ function update() {
 
     if (mouse.isDown && now - player.lastShotTime > player.fireRate) {
         player.lastShotTime = now;
-        const angle = Math.atan2(mouse.y - (player.y + player.height / 2), mouse.x - (player.x + player.width / 2));
+        const baseAngle = Math.atan2(mouse.y - (player.y + player.height / 2), mouse.x - (player.x + player.width / 2));
 
         if (player.type === 'square') {
-            playerBullets.push({
-                x: player.x + player.width / 2, y: player.y + player.height / 2,
-                width: 8, height: 8, color: '#00BFFF',
-                velocityX: Math.cos(angle) * 12, velocityY: Math.sin(angle) * 12,
-                damage: player.bulletDamage
-            });
+            for (let i = 0; i < player.bulletCount; i++) {
+                const spread = (i - (player.bulletCount - 1) / 2) * 0.1;
+                const angle = baseAngle + spread;
+                playerBullets.push({
+                    x: player.x + player.width / 2, y: player.y + player.height / 2,
+                    width: 8, height: 8, color: '#00BFFF',
+                    velocityX: Math.cos(angle) * 12, velocityY: Math.sin(angle) * 12,
+                    damage: player.bulletDamage
+                });
+            }
         } else if (player.type === 'triangle') {
             const playerCenterX = player.x + player.width / 2;
             const playerCenterY = player.y + player.height / 2;
             const laserDist = 1500;
-            const laserEndX = playerCenterX + Math.cos(angle) * laserDist;
-            const laserEndY = playerCenterY + Math.sin(angle) * laserDist;
+            const laserEndX = playerCenterX + Math.cos(baseAngle) * laserDist;
+            const laserEndY = playerCenterY + Math.sin(baseAngle) * laserDist;
 
+            // Simplified laser collision with width
+            // For simplicity, we check a few points or just the line if it intersects
             if (lineRectIntersect(playerCenterX, playerCenterY, laserEndX, laserEndY, enemy.x, enemy.y, enemy.width, enemy.height)) {
                 enemy.health -= player.bulletDamage * 0.5;
                 if (enemy.health <= 0) showUpgradeScreen();
             }
-            visualLasers.push({ x1: playerCenterX, y1: playerCenterY, x2: laserEndX, y2: laserEndY, color: '#FFD700', life: 5 });
+            visualLasers.push({ x1: playerCenterX, y1: playerCenterY, x2: laserEndX, y2: laserEndY, color: '#FFD700', life: 5, width: player.laserWidth });
         } else if (player.type === 'circle') {
-            if (boomerangs.length === 0) {
+            if (boomerangs.length < player.boomerangCount) {
+                const angle = baseAngle + (boomerangs.length * 0.2); // slight spread if multiple
                 boomerangs.push({
                     x: player.x + player.width / 2, y: player.y + player.height / 2,
                     width: 20, height: 10, color: '#90EE90',

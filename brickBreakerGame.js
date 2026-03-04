@@ -23,7 +23,7 @@ let powerBallActive = false;
 let powerBallTimer = 0;
 
 // Game settings
-const PADDLE_WIDTH = 100;
+const PADDLE_WIDTH = 120; // Slightly wider for better feel
 const PADDLE_HEIGHT = 20;
 const BALL_RADIUS = 10;
 let brickRowCount = 3;
@@ -33,7 +33,7 @@ const BRICK_HEIGHT = 20;
 const BRICK_PADDING = 10;
 const BRICK_OFFSET_TOP = 50;
 const BRICK_OFFSET_LEFT = 30;
-const ITEM_SIZE = 20;
+const ITEM_SIZE = 22;
 
 const ITEM_TYPES = {
     MULTI: { color: '#00FF00', label: 'M' }, // Multi Ball
@@ -96,8 +96,9 @@ function setupRound() {
     // Difficulty increases with rounds
     brickRowCount = Math.min(8, 2 + round); 
     
-    paddle = { height: PADDLE_HEIGHT, width: PADDLE_WIDTH, x: (canvas.width - PADDLE_WIDTH) / 2, y: canvas.height - PADDLE_HEIGHT - 10, dx: 10 };
-    balls = [{ x: canvas.width / 2, y: paddle.y - BALL_RADIUS, dx: 4, dy: -4, radius: BALL_RADIUS }];
+    paddle = { height: PADDLE_HEIGHT, width: PADDLE_WIDTH, x: (canvas.width - PADDLE_WIDTH) / 2, y: canvas.height - PADDLE_HEIGHT - 10, dx: 12 };
+    const speed = 5 + (round * 0.5); // Faster ball speed
+    balls = [{ x: canvas.width / 2, y: paddle.y - BALL_RADIUS, dx: speed, dy: -speed, radius: BALL_RADIUS }];
     
     createBricks();
     createObstacles();
@@ -255,7 +256,7 @@ function update() {
         if (ball.x > paddle.x && ball.x < paddle.x + paddle.width && ball.y + ball.radius > paddle.y) {
             ball.dy = -Math.abs(ball.dy);
             const hitPoint = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
-            ball.dx = hitPoint * 6;
+            ball.dx = hitPoint * 8; // Increased impact
         }
 
         // Obstacle collision
@@ -281,8 +282,8 @@ function update() {
                         score += 10;
                         activeBricks--;
                         
-                        // Item drop chance (30%)
-                        if (Math.random() < 0.3) {
+                        // Item drop chance (50% - more satisfying)
+                        if (Math.random() < 0.5) {
                             const types = Object.keys(ITEM_TYPES);
                             const type = ITEM_TYPES[types[Math.floor(Math.random() * types.length)]];
                             items.push({ x: b.x + BRICK_WIDTH/2, y: b.y + BRICK_HEIGHT/2, type: type });
@@ -306,7 +307,7 @@ function update() {
     // Update items
     for (let i = items.length - 1; i >= 0; i--) {
         const item = items[i];
-        item.y += 1.5; 
+        item.y += 3.5; // Faster falling speed
 
         if (item.y > canvas.height) items.splice(i, 1);
         else if (item.x > paddle.x && item.x < paddle.x + paddle.width && item.y + ITEM_SIZE > paddle.y) {
@@ -330,7 +331,8 @@ function applyItem(type) {
 }
 
 function resetBallOnPaddle() {
-    balls = [{ x: paddle.x + paddle.width / 2, y: paddle.y - BALL_RADIUS, dx: 4, dy: -4, radius: BALL_RADIUS }];
+    const speed = 5 + (round * 0.5);
+    balls = [{ x: paddle.x + paddle.width / 2, y: paddle.y - BALL_RADIUS, dx: speed, dy: -speed, radius: BALL_RADIUS }];
     gameStarted = false;
     items = [];
     powerBallActive = false;
