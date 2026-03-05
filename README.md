@@ -2,6 +2,9 @@ A simple HTML/JS/CSS starter template
 
 This is my Vibe coding test repositories.
 
+https://vibe-coding-test.pages.dev/
+
+
 2026/02/05
 
 Make game
@@ -40,3 +43,4 @@ Make game
 2026/03/04 - v7
 
 농구 게임 추가 / 비행기 게임 탄환 버그 수정 / 스네이크 게임 버그 수정2 / 너무 많은 수정
+
