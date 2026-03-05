@@ -182,7 +182,7 @@ function handleKeyDown(e) {
 export function init(containerElement, options = {}) {
     gameContainer = containerElement;
     canvas = document.createElement('canvas');
-    canvas.width = COLS * BLOCK_SIZE;
+    canvas.width = COLS * BLOCK_SIZE + 150; // Extra width for UI
     canvas.height = ROWS * BLOCK_SIZE;
     gameContainer.appendChild(canvas);
     ctx = canvas.getContext('2d');
@@ -256,22 +256,41 @@ function drawPiece(piece) {
 }
 
 function drawUI() {
-    const textColor = getComputedStyle(document.body).getPropertyValue('--text-color');
+    const style = getComputedStyle(document.body);
+    const textColor = style.getPropertyValue('--text-color') || '#f8fafc';
+    
     // Score, Level, Lines Cleared
     ctx.fillStyle = textColor;
     ctx.font = '20px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText('Score: ' + score, 5, 25);
-    ctx.fillText('Level: ' + level, 5, 50);
-    ctx.fillText('Lines: ' + linesCleared, 5, 75);
+    ctx.fillText('Score: ' + score, 10, 25);
+    ctx.fillText('Level: ' + level, 10, 50);
+    ctx.fillText('Lines: ' + linesCleared, 10, 75);
 
-    // Next Piece
-    ctx.fillText('Next:', COLS * BLOCK_SIZE + 10, 25);
+    // Next Piece Area
+    const nextAreaX = COLS * BLOCK_SIZE + 20;
+    const nextAreaY = 50;
+    ctx.fillText('Next:', nextAreaX, 30);
+    
+    // Draw box for next piece
+    ctx.strokeStyle = textColor;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(nextAreaX, nextAreaY, 4 * BLOCK_SIZE, 4 * BLOCK_SIZE);
+
     if (nextPiece) {
-        for (let r = 0; r < nextPiece.shape.length; r++) {
-            for (let c = 0; c < nextPiece.shape[r].length; c++) {
-                if (nextPiece.shape[r][c] !== 0) {
-                    drawBlock(COLS + c + 0.5, r + 2, nextPiece.color); // Position next piece
+        const shape = nextPiece.shape;
+        const offsetX = nextAreaX + (4 * BLOCK_SIZE - shape[0].length * BLOCK_SIZE) / 2;
+        const offsetY = nextAreaY + (4 * BLOCK_SIZE - shape.length * BLOCK_SIZE) / 2;
+        
+        for (let r = 0; r < shape.length; r++) {
+            for (let c = 0; c < shape[r].length; c++) {
+                if (shape[r][c] !== 0) {
+                    // Draw block in the next piece preview
+                    ctx.fillStyle = nextPiece.color;
+                    ctx.fillRect(offsetX + c * BLOCK_SIZE, offsetY + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(offsetX + c * BLOCK_SIZE, offsetY + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                 }
             }
         }

@@ -40,6 +40,20 @@ function lineLineIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
     return (ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1);
 }
 
+function getLineIntersection(x1, y1, x2, y2, x3, y3, x4, y4) {
+    const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+    if (denom === 0) return null;
+    const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+    const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
+    if (ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1) {
+        return {
+            x: x1 + ua * (x2 - x1),
+            y: y1 + ua * (y2 - y1)
+        };
+    }
+    return null;
+}
+
 // Player and Enemy objects
 let player = {};
 let enemy = {};
@@ -294,11 +308,31 @@ function update() {
             const playerCenterX = player.x + player.width / 2;
             const playerCenterY = player.y + player.height / 2;
             const laserDist = 1500;
-            const laserEndX = playerCenterX + Math.cos(baseAngle) * laserDist;
-            const laserEndY = playerCenterY + Math.sin(baseAngle) * laserDist;
+            let laserEndX = playerCenterX + Math.cos(baseAngle) * laserDist;
+            let laserEndY = playerCenterY + Math.sin(baseAngle) * laserDist;
 
-            // Simplified laser collision with width
-            // For simplicity, we check a few points or just the line if it intersects
+            // Check obstacle collision for laser
+            let nearestDist = laserDist;
+            obstacles.forEach(obs => {
+                const sides = [
+                    {x1: obs.x, y1: obs.y, x2: obs.x + obs.width, y2: obs.y},
+                    {x1: obs.x, y1: obs.y + obs.height, x2: obs.x + obs.width, y2: obs.y + obs.height},
+                    {x1: obs.x, y1: obs.y, x2: obs.x, y2: obs.y + obs.height},
+                    {x1: obs.x + obs.width, y1: obs.y, x2: obs.x + obs.width, y2: obs.y + obs.height}
+                ];
+                sides.forEach(side => {
+                    const intersect = getLineIntersection(playerCenterX, playerCenterY, laserEndX, laserEndY, side.x1, side.y1, side.x2, side.y2);
+                    if (intersect) {
+                        const d = Math.sqrt((intersect.x - playerCenterX)**2 + (intersect.y - playerCenterY)**2);
+                        if (d < nearestDist) {
+                            nearestDist = d;
+                            laserEndX = intersect.x;
+                            laserEndY = intersect.y;
+                        }
+                    }
+                });
+            });
+
             if (lineRectIntersect(playerCenterX, playerCenterY, laserEndX, laserEndY, enemy.x, enemy.y, enemy.width, enemy.height)) {
                 enemy.health -= player.bulletDamage * 0.5;
                 if (enemy.health <= 0) showUpgradeScreen();
@@ -347,6 +381,17 @@ function update() {
     boomerangs.forEach((b, i) => {
         b.x += b.velocityX; b.y += b.velocityY; b.rotation += 0.3;
         b.distanceTraveled += Math.sqrt(b.velocityX**2 + b.velocityY**2);
+        
+        if (b.state === 'out') {
+            for (let obs of obstacles) {
+                if (checkCollision(b, obs)) {
+                    b.state = 'returning';
+                    b.canDamage = true;
+                    break;
+                }
+            }
+        }
+
         if (b.state === 'out' && b.distanceTraveled >= b.maxDistance) {
             b.state = 'returning';
             b.canDamage = true;
@@ -364,7 +409,16 @@ function update() {
 
     playerBullets.forEach((b, i) => {
         b.x += b.velocityX; b.y += b.velocityY;
-        if (checkCollision(b, enemy)) {
+        let hitObstacle = false;
+        for (let obstacle of obstacles) {
+            if (checkCollision(b, obstacle)) {
+                hitObstacle = true;
+                break;
+            }
+        }
+        if (hitObstacle) {
+            playerBullets.splice(i, 1);
+        } else if (checkCollision(b, enemy)) {
             enemy.health -= b.damage; playerBullets.splice(i, 1);
             if (enemy.health <= 0) showUpgradeScreen();
         } else if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
@@ -374,7 +428,16 @@ function update() {
 
     enemyBullets.forEach((b, i) => {
         b.x += b.velocityX; b.y += b.velocityY;
-        if (checkCollision(b, player)) {
+        let hitObstacle = false;
+        for (let obstacle of obstacles) {
+            if (checkCollision(b, obstacle)) {
+                hitObstacle = true;
+                break;
+            }
+        }
+        if (hitObstacle) {
+            enemyBullets.splice(i, 1);
+        } else if (checkCollision(b, player)) {
             player.health -= b.damage; enemyBullets.splice(i, 1);
             if (player.health <= 0) gameState = 'gameOver';
         } else if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {

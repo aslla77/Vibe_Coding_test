@@ -32,16 +32,16 @@ function handleKeyDown(e) {
 
     switch (e.key) {
         case 'ArrowUp':
-            if (dy === 0) { nextDx = 0; nextDy = -1; }
+            if (dy !== 1) { nextDx = 0; nextDy = -1; }
             break;
         case 'ArrowDown':
-            if (dy === 0) { nextDx = 0; nextDy = 1; }
+            if (dy !== -1) { nextDx = 0; nextDy = 1; }
             break;
         case 'ArrowLeft':
-            if (dx === 0) { nextDx = -1; nextDy = 0; }
+            if (dx !== 1) { nextDx = -1; nextDy = 0; }
             break;
         case 'ArrowRight':
-            if (dx === 0) { nextDx = 1; nextDy = 0; }
+            if (dx !== -1) { nextDx = 1; nextDy = 0; }
             break;
         case ' ':
             if (gameOver) {
@@ -84,6 +84,7 @@ function resetGame() {
     gameStarted = false;
     speed = 7;
     lastUpdateTime = performance.now();
+    if (canvas) canvas.removeEventListener('click', returnToMenuOnce);
 }
 
 // --- Game Start/Stop ---
@@ -118,6 +119,7 @@ function update() {
     // Wall collision
     if (head.x < 0 || head.x >= TILE_COUNT || head.y < 0 || head.y >= TILE_COUNT) {
         gameOver = true;
+        canvas.addEventListener('click', returnToMenuOnce);
         return;
     }
 
@@ -125,6 +127,7 @@ function update() {
     for (let i = 0; i < snake.length; i++) {
         if (snake[i].x === head.x && snake[i].y === head.y) {
             gameOver = true;
+            canvas.addEventListener('click', returnToMenuOnce);
             return;
         }
     }
@@ -146,8 +149,9 @@ function update() {
 
 // --- Drawing ---
 function draw() {
-    const canvasBg = getComputedStyle(document.body).getPropertyValue('--canvas-bg');
-    const textColor = getComputedStyle(document.body).getPropertyValue('--text-color');
+    const style = getComputedStyle(document.body);
+    const canvasBg = style.getPropertyValue('--canvas-bg') || '#1e293b';
+    const textColor = style.getPropertyValue('--text-color') || '#f8fafc';
 
     ctx.fillStyle = canvasBg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -183,7 +187,6 @@ function draw() {
         ctx.font = '20px Arial';
         ctx.fillText('Final Score: ' + score, canvas.width / 2, canvas.height / 2 + 20);
         ctx.fillText('Click to return to menu', canvas.width / 2, canvas.height / 2 + 60);
-        canvas.addEventListener('click', returnToMenuOnce);
     }
 }
 

@@ -10,6 +10,8 @@
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
     --card-hover: rgba(255, 255, 255, 0.1);
+    --canvas-bg: #1e293b;
+    --text-color: #f8fafc;
 }
 
 body.light-mode {
@@ -19,6 +21,8 @@ body.light-mode {
     --glass-border: rgba(0, 0, 0, 0.1);
     --card-hover: rgba(0, 0, 0, 0.05);
     --accent: #0891b2;
+    --canvas-bg: #e2e8f0;
+    --text-color: #1e293b;
 }
 
 * {
