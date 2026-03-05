@@ -16,10 +16,17 @@ let goalScore = 5;
 let balls = [];
 const GRAVITY = 0.5;
 const FRICTION = 0.98;
-const BALL_RADIUS = 20;
+const BALL_RADIUS = 25;
 
 // Mouse/Interaction variables
-let isDragging = false;
+let isCharging = false;
+let currentPower = 0;
+let powerDirection = 1;
+let chargeStartTime = 0;
+const MAX_POWER = 25;
+const MIN_POWER = 5;
+const POWER_SPEED = 0.4; // Speed of power oscillation
+
 let dragStartX, dragStartY;
 let currentMouseX, currentMouseY;
 
@@ -27,7 +34,7 @@ let currentMouseX, currentMouseY;
 let hoop = {
     x: 500,
     y: 150,
-    width: 100,
+    width: 120,
     height: 10,
     speed: 0,
     direction: 1,
@@ -66,7 +73,7 @@ function resetGame() {
     goalScore = 5;
     gameState = 'playing';
     balls = [];
-    hoop.width = 100;
+    hoop.width = 120;
     hoop.speed = 0;
     hoop.isStopped = false;
     items = { stopHoop: false, wideHoop: false, doubleShot: false };
@@ -90,14 +97,12 @@ function startRound() {
     roundScore = 0;
     goalScore = 5 + (round - 1) * 3;
     
-    // Increase difficulty: hoop speed
     if (round > 1) {
-        hoop.speed = Math.min(8, (round - 1) * 1.5);
+        hoop.speed = Math.min(10, (round - 1) * 1.5);
     } else {
         hoop.speed = 0;
     }
 
-    // Apply item effects for the round
     if (items.stopHoop) {
         hoop.isStopped = true;
         hoop.speed = 0;
@@ -106,9 +111,9 @@ function startRound() {
     }
 
     if (items.wideHoop) {
-        hoop.width = 160;
+        hoop.width = 180;
     } else {
-        hoop.width = 100;
+        hoop.width = 120;
     }
 
     balls = [];
@@ -123,14 +128,15 @@ function handleMouseDown(e) {
     const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
     const my = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-    // Only allow dragging if there's a ball at the starting position
     const ball = balls.find(b => !b.inAir);
     if (ball) {
         const dist = Math.sqrt((mx - ball.x) ** 2 + (my - ball.y) ** 2);
-        if (dist < ball.radius * 2) {
-            isDragging = true;
-            dragStartX = mx;
-            dragStartY = my;
+        if (dist < ball.radius * 3) { // Larger hit area for easier starting
+            isCharging = true;
+            currentPower = MIN_POWER;
+            powerDirection = 1;
+            dragStartX = ball.x;
+            dragStartY = ball.y;
         }
     }
 }
@@ -142,23 +148,23 @@ function handleMouseMove(e) {
 }
 
 function handleMouseUp(e) {
-    if (!isDragging) return;
-    isDragging = false;
-
-    const rect = canvas.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+    if (!isCharging) return;
+    isCharging = false;
 
     const ball = balls.find(b => !b.inAir);
     if (ball) {
-        // Calculate velocity based on drag distance
-        ball.vx = (dragStartX - mx) * 0.15;
-        ball.vy = (dragStartY - my) * 0.15;
+        // Shooting direction based on current mouse position relative to ball
+        const angle = Math.atan2(currentMouseY - dragStartY, currentMouseX - dragStartX);
+        
+        // Reverse direction for more natural "pull back and shoot" or just "aim and power"
+        // Let's use "aim and power": Mouse position determines direction, oscillating bar determines speed.
+        ball.vx = Math.cos(angle) * currentPower;
+        ball.vy = Math.sin(angle) * currentPower;
         ball.inAir = true;
 
         if (items.doubleShot) {
             balls.push({
-                x: ball.x + 30,
+                x: ball.x + 40,
                 y: ball.y,
                 vx: ball.vx,
                 vy: ball.vy,
@@ -168,7 +174,6 @@ function handleMouseUp(e) {
             });
         }
 
-        // Spawn next ball after a delay if round isn't over
         setTimeout(() => {
             if (gameState === 'playing' && balls.filter(b => !b.inAir).length === 0) {
                 spawnBall();
@@ -180,6 +185,18 @@ function handleMouseUp(e) {
 // --- Game Logic ---
 function update() {
     if (gameState !== 'playing') return;
+
+    // Update Power Bar Oscillation
+    if (isCharging) {
+        currentPower += POWER_SPEED * powerDirection * 25; // Increase speed of change
+        if (currentPower >= MAX_POWER) {
+            currentPower = MAX_POWER;
+            powerDirection = -1;
+        } else if (currentPower <= MIN_POWER) {
+            currentPower = MIN_POWER;
+            powerDirection = 1;
+        }
+    }
 
     // Update Hoop
     if (!hoop.isStopped) {
@@ -197,9 +214,9 @@ function update() {
             ball.vy += GRAVITY;
             ball.vx *= FRICTION;
 
-            // Check Score
+            // Check Score (More robust check)
             if (!ball.isScored && ball.vy > 0 && 
-                ball.y > hoop.y && ball.y < hoop.y + 20 &&
+                ball.y > hoop.y - 10 && ball.y < hoop.y + 10 &&
                 ball.x > hoop.x - hoop.width / 2 && ball.x < hoop.x + hoop.width / 2) {
                 ball.isScored = true;
                 score += 1;
@@ -229,15 +246,13 @@ function showUpgradeScreen() {
         { id: 'doubleShot', name: 'Double Shot', description: 'Shoot two balls at once.' }
     ];
     
-    // Pick random upgrades
     upgradeOptions = [];
     const pool = [...allItems];
-    for(let i=0; i<3; i++) {
+    for(let i=0; i<3 && pool.length > 0; i++) {
         const idx = Math.floor(Math.random() * pool.length);
         upgradeOptions.push(pool.splice(idx, 1)[0]);
     }
 
-    // Reset items for next round choice
     items = { stopHoop: false, wideHoop: false, doubleShot: false };
 }
 
@@ -256,33 +271,71 @@ function draw() {
     ctx.fillStyle = canvasBg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw Hoop
+    // Draw Backboard
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.fillRect(hoop.x - 70, hoop.y - 100, 140, 100);
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(hoop.x - 70, hoop.y - 100, 140, 100);
+    ctx.strokeRect(hoop.x - 30, hoop.y - 60, 60, 40);
+
+    // Draw Rim (The Ring)
     ctx.strokeStyle = '#ff4500';
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 8;
     ctx.beginPath();
-    ctx.moveTo(hoop.x - hoop.width / 2, hoop.y);
-    ctx.lineTo(hoop.x + hoop.width / 2, hoop.y);
+    // Use ellipse for a 3D perspective rim
+    ctx.ellipse(hoop.x, hoop.y, hoop.width / 2, 15, 0, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Draw Backboard (visual only)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.fillRect(hoop.x - 60, hoop.y - 80, 120, 80);
-    ctx.strokeStyle = 'white';
-    ctx.strokeRect(hoop.x - 60, hoop.y - 80, 120, 80);
+    // Draw Net
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for(let i = -hoop.width/2; i <= hoop.width/2; i += 20) {
+        ctx.moveTo(hoop.x + i, hoop.y);
+        ctx.lineTo(hoop.x + i * 0.7, hoop.y + 60);
+    }
+    ctx.stroke();
 
-    // Draw Drag Line
-    if (isDragging) {
+    // Draw Aiming Line
+    if (isCharging) {
         ctx.setLineDash([5, 5]);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.beginPath();
         ctx.moveTo(dragStartX, dragStartY);
         ctx.lineTo(currentMouseX, currentMouseY);
         ctx.stroke();
         ctx.setLineDash([]);
+
+        // Draw Power Bar next to the ball
+        const barX = dragStartX + 50;
+        const barY = dragStartY - 50;
+        const barW = 20;
+        const barH = 100;
+        
+        // Bar background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(barX, barY, barW, barH);
+        
+        // Bar fill
+        const fillHeight = ((currentPower - MIN_POWER) / (MAX_POWER - MIN_POWER)) * barH;
+        const hue = 120 - (fillHeight / barH) * 120; // Green to Red
+        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+        ctx.fillRect(barX, barY + barH - fillHeight, barW, fillHeight);
+        
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(barX, barY, barW, barH);
     }
 
     // Draw Balls
     balls.forEach(ball => {
+        // Ball shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.beginPath();
+        ctx.ellipse(ball.x, canvas.height - 20, ball.radius * (ball.y / canvas.height), 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.fillStyle = '#ff8c00';
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -291,20 +344,22 @@ function draw() {
         ctx.lineWidth = 2;
         ctx.stroke();
         
-        // Basketball lines
+        // Basketball texture lines
         ctx.beginPath();
         ctx.moveTo(ball.x - ball.radius, ball.y);
         ctx.lineTo(ball.x + ball.radius, ball.y);
+        ctx.moveTo(ball.x, ball.y - ball.radius);
+        ctx.lineTo(ball.x, ball.y + ball.radius);
         ctx.stroke();
     });
 
     // Draw UI
     ctx.fillStyle = textColor;
-    ctx.font = '24px Arial';
+    ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(`Round: ${round}`, 20, 40);
-    ctx.fillText(`Score: ${score}`, 20, 70);
-    ctx.fillText(`Round Score: ${roundScore} / ${goalScore}`, 20, 100);
+    ctx.fillText(`ROUND: ${round}`, 20, 40);
+    ctx.fillText(`SCORE: ${score}`, 20, 70);
+    ctx.fillText(`GOAL: ${roundScore} / ${goalScore}`, 20, 100);
 
     if (gameState === 'upgrade') {
         drawUpgradeScreen(textColor);
@@ -312,29 +367,34 @@ function draw() {
 }
 
 function drawUpgradeScreen(textColor) {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     ctx.fillStyle = 'white';
-    ctx.font = '48px Arial';
+    ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('Round Complete!', canvas.width / 2, 150);
+    ctx.fillText('ROUND COMPLETE!', canvas.width / 2, 150);
     ctx.font = '24px Arial';
     ctx.fillText('Choose an Item for Next Round', canvas.width / 2, 200);
 
     upgradeOptions.forEach((opt, i) => {
-        const x = canvas.width / 2 - 150;
-        const y = 250 + i * 100;
-        const w = 300;
-        const h = 80;
+        const x = canvas.width / 2 - 200;
+        const y = 250 + i * 110;
+        const w = 400;
+        const h = 90;
 
         ctx.fillStyle = '#22d3ee';
         ctx.fillRect(x, y, w, h);
+        
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(x, y, w, h);
+
         ctx.fillStyle = 'black';
-        ctx.font = 'bold 20px Arial';
-        ctx.fillText(opt.name, canvas.width / 2, y + 35);
-        ctx.font = '16px Arial';
-        ctx.fillText(opt.description, canvas.width / 2, y + 60);
+        ctx.font = 'bold 22px Arial';
+        ctx.fillText(opt.name, canvas.width / 2, y + 40);
+        ctx.font = '18px Arial';
+        ctx.fillText(opt.description, canvas.width / 2, y + 70);
 
         opt.clickArea = { x, y, w, h };
     });

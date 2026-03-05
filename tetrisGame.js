@@ -182,7 +182,7 @@ function handleKeyDown(e) {
 export function init(containerElement, options = {}) {
     gameContainer = containerElement;
     canvas = document.createElement('canvas');
-    canvas.width = COLS * BLOCK_SIZE + 150; // Extra width for UI
+    canvas.width = COLS * BLOCK_SIZE + 180; // Extra width for UI
     canvas.height = ROWS * BLOCK_SIZE;
     gameContainer.appendChild(canvas);
     ctx = canvas.getContext('2d');
@@ -235,6 +235,20 @@ function drawBlock(x, y, color) {
 }
 
 function drawBoard() {
+    // Draw board background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(0, 0, COLS * BLOCK_SIZE, ROWS * BLOCK_SIZE);
+    
+    // Draw grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    for(let i=0; i<=COLS; i++) {
+        ctx.beginPath(); ctx.moveTo(i*BLOCK_SIZE, 0); ctx.lineTo(i*BLOCK_SIZE, ROWS*BLOCK_SIZE); ctx.stroke();
+    }
+    for(let i=0; i<=ROWS; i++) {
+        ctx.beginPath(); ctx.moveTo(0, i*BLOCK_SIZE); ctx.lineTo(COLS*BLOCK_SIZE, i*BLOCK_SIZE); ctx.stroke();
+    }
+
     for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
             if (board[r][c] !== 0) {
@@ -259,33 +273,31 @@ function drawUI() {
     const style = getComputedStyle(document.body);
     const textColor = style.getPropertyValue('--text-color') || '#f8fafc';
     
-    // Score, Level, Lines Cleared
-    ctx.fillStyle = textColor;
-    ctx.font = '20px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText('Score: ' + score, 10, 25);
-    ctx.fillText('Level: ' + level, 10, 50);
-    ctx.fillText('Lines: ' + linesCleared, 10, 75);
+    // UI Area position
+    const uiX = COLS * BLOCK_SIZE + 20;
 
     // Next Piece Area
-    const nextAreaX = COLS * BLOCK_SIZE + 20;
     const nextAreaY = 50;
-    ctx.fillText('Next:', nextAreaX, 30);
+    ctx.fillStyle = textColor;
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('NEXT', uiX, 30);
     
-    // Draw box for next piece
+    // Draw distinct box for next piece
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.fillRect(uiX, nextAreaY, 4 * BLOCK_SIZE + 20, 4 * BLOCK_SIZE + 20);
     ctx.strokeStyle = textColor;
     ctx.lineWidth = 2;
-    ctx.strokeRect(nextAreaX, nextAreaY, 4 * BLOCK_SIZE, 4 * BLOCK_SIZE);
+    ctx.strokeRect(uiX, nextAreaY, 4 * BLOCK_SIZE + 20, 4 * BLOCK_SIZE + 20);
 
     if (nextPiece) {
         const shape = nextPiece.shape;
-        const offsetX = nextAreaX + (4 * BLOCK_SIZE - shape[0].length * BLOCK_SIZE) / 2;
-        const offsetY = nextAreaY + (4 * BLOCK_SIZE - shape.length * BLOCK_SIZE) / 2;
+        const offsetX = uiX + 10 + (4 * BLOCK_SIZE - shape[0].length * BLOCK_SIZE) / 2;
+        const offsetY = nextAreaY + 10 + (4 * BLOCK_SIZE - shape.length * BLOCK_SIZE) / 2;
         
         for (let r = 0; r < shape.length; r++) {
             for (let c = 0; c < shape[r].length; c++) {
                 if (shape[r][c] !== 0) {
-                    // Draw block in the next piece preview
                     ctx.fillStyle = nextPiece.color;
                     ctx.fillRect(offsetX + c * BLOCK_SIZE, offsetY + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                     ctx.strokeStyle = 'black';
@@ -295,6 +307,24 @@ function drawUI() {
             }
         }
     }
+
+    // Score, Level, Lines Cleared - Repositioned below "Next" box
+    const infoY = nextAreaY + 4 * BLOCK_SIZE + 60;
+    ctx.fillStyle = textColor;
+    ctx.font = '18px Arial';
+    ctx.fillText('SCORE', uiX, infoY);
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText(score, uiX, infoY + 30);
+
+    ctx.font = '18px Arial';
+    ctx.fillText('LEVEL', uiX, infoY + 80);
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText(level, uiX, infoY + 110);
+
+    ctx.font = '18px Arial';
+    ctx.fillText('LINES', uiX, infoY + 160);
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText(linesCleared, uiX, infoY + 190);
 }
 
 // --- Game Loop ---
@@ -331,7 +361,7 @@ function gameLoop(currentTime) {
         lastDropTime = currentTime;
     }
 
-    ctx.clearRect(0, 0, canvas.width + 100, canvas.height); // Clear canvas (include UI area)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBoard();
     drawPiece(currentPiece);
     drawUI();
