@@ -5,6 +5,7 @@ import * as brickBreakerGame from './brickBreakerGame.js';
 import * as tetrisGame from './tetrisGame.js';
 import * as snakeGame from './snakeGame.js';
 import * as memoryGame from './memoryGame.js';
+import * as basketballGame from './basketballGame.js';
 
 const gameSelectionScreen = document.getElementById('gameSelectionScreen');
 const gameContainer = document.getElementById('gameContainer');
@@ -21,7 +22,7 @@ const games = {
     'tetris': tetrisGame,
     'snake': snakeGame,
     'memory': memoryGame,
-    'game6': { init: () => console.log('Game 6 init'), start: () => console.log('Game 6 started'), stop: () => console.log('Game 6 stopped') },
+    'basketball': basketballGame,
     'game7': { init: () => console.log('Game 7 init'), start: () => console.log('Game 7 started'), stop: () => console.log('Game 7 stopped') },
     'game8': { init: () => console.log('Game 8 init'), start: () => console.log('Game 8 started'), stop: () => console.log('Game 8 stopped') },
     'game9': { init: () => console.log('Game 9 init'), start: () => console.log('Game 9 started'), stop: () => console.log('Game 9 stopped') }
