@@ -4,6 +4,7 @@ This is my Vibe coding test repositories.
 
 https://vibe-coding-test.pages.dev/
 
+홈체이지 제작중이라 딜레이 되는중
 
 2026/02/05
 
